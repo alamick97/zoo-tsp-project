@@ -3,11 +3,9 @@
 #include "Zoo.h"
 
 Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
-    //default init of vals GO HERE (TODO)
     _mode_flag = false;
     _mode = Mode::Unspecified;
 
-    //TODO: Fix/adapt for this project (copied from P3).
     int opt;
 	int opt_idx;
 
@@ -19,10 +17,9 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	while ((opt = getopt_long(_argc, _argv, "m:h", long_opts, &opt_idx)) != -1) {
 		switch(opt) {
 			case 'm':
-                if (optarg == "MST") { _mode = Mode::MST; } 
-                else if (optarg == "FASTTSP") { _mode = Mode::FASTTSP; }
-                else if (optarg == "OPTTSP") { _mode = Mode::OPTTSP; }
-                //TODO: Finish.
+                if (strcmp(optarg, "MST") == 0) { _mode = Mode::MST; } 
+                else if (strcmp(optarg, "FASTTSP") == 0) { _mode = Mode::FASTTSP; }
+                else if (strcmp(optarg, "OPTTSP") == 0) { _mode = Mode::OPTTSP; }
 				break;
 			case 'h':
 				std::cout << "HELP:\n";
@@ -38,6 +35,10 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 
     if (_mode == Mode::Unspecified) {
         std::cerr << "Must provide a -m/--mode option, which requires an argument (MST, FASTTSP, or OPTTSP).\n";
+		std::cerr << "See -h/--help for more details.\n";
         exit(1); 
     }
 } //Zoo()
+    
+	
+void readInput(); //reads input redirection via cin. 

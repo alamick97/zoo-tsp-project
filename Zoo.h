@@ -1,6 +1,7 @@
 //Project Identifier: 3E33912F8BAA7542FC4A1585D2DB6FE0312725B9
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -21,6 +22,8 @@ class Zoo {
 
 public:
     Zoo(int argc, char** argv);
+
+    void readInput(); //reads input redirection via cin. 
 
 };
 
