@@ -41,4 +41,15 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 } //Zoo()
     
 	
-void readInput(); //reads input redirection via cin. 
+void Zoo::readInput() {
+	//TODO: Implement using cin.
+	uint32_t numVertices;
+	int x, y;
+
+	std::cin >> numVertices;
+	for (uint32_t i = 0; i < numVertices; ++i) {
+		std::cin >> x >> y;
+		std::cout << i << ": (" << x << ", " << y << ")\n";
+	}
+
+} //readInput()

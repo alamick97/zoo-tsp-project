@@ -1,0 +1,11 @@
+void Zoo::readInput() {
+	//TODO: Implement using cin.
+	uint32_t numVertices;
+	int x, y;
+
+	std::cin >> numVertices;
+	for (uint32_t i = 0; i < numVertices; ++i) {
+		std::cin >> x >> y;
+		std::cout << "(" << x << ", " << y << ")\n";
+	}
+}
