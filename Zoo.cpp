@@ -42,10 +42,10 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
     
 	
 void Zoo::readInput() {
-	//TODO: Implement using cin.
 	uint32_t numVertices;
 	int x, y;
 
+	//TODO: Store properly when necessary. 
 	std::cin >> numVertices;
 	for (uint32_t i = 0; i < numVertices; ++i) {
 		std::cin >> x >> y;
