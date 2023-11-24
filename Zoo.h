@@ -24,7 +24,9 @@ public:
     Zoo(int argc, char** argv);
 
     void readInput(); //reads input redirection via cin. 
-
+    void findMST();
+    void findFASTTSP();
+    void findOPTTSP();
 };
 
 

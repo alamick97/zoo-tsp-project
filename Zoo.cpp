@@ -53,3 +53,15 @@ void Zoo::readInput() {
 	}
 
 } //readInput()
+
+void findMST() {
+	//TODO: Implement.
+}
+
+void findFASTTSP() {
+	//TODO: Implement.
+}
+
+void findOPTTSP() {
+	//TODO: Implement.
+}
