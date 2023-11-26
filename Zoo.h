@@ -2,7 +2,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <tuple>
+#include <limits>
 #include <cstring>
+#include <cmath> //sqrt
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -17,15 +20,23 @@ enum class Mode {
 
 enum class Category {
     Wild,
-    Domestic,
+    Safe,
     WallCage
 };
 
 struct Vertex {
     int x;
     int y;
-    uint32_t id;
+    //uint32_t id; //no need to store id. vector index is id.
     Category cat;
+};
+
+struct primsTable {
+    bool kv;
+    double dv;
+    uint32_t pv;
+
+    primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()) {} 
 };
 
 class Zoo {
@@ -33,15 +44,21 @@ class Zoo {
     char** _argv;
     bool _mode_flag;
     Mode _mode;
+    uint32_t _num_vertices;
+    uint32_t _arbitrary_root_id;
 
+    std::vector<Vertex> _vertices;
+    std::vector<primsTable> _primsTable;
 public:
     Zoo(int argc, char** argv);
 
-    double calcDist(); //distance helper function
+    double getDistance(Vertex v1, Vertex v2); //get euclid dist
     Category getCategory(int x, int y); //calculates & determines category
+    void initPrimsTable();
     
     void readInput(); //reads input redirection via cin. 
     void runMST();
+    void primsLinear(); //runs prim's linear
 };
 
 

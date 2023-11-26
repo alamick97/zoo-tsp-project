@@ -1,0 +1,12 @@
+Zoo.h:
+
+//std::unordered_map<uint32_t, primsTable> _primsTables; 
+//std::vector<std::tuple<bool, double, uint32_t>> _primsTable;
+
+struct primsTable {
+    bool kv;
+    double dv;
+    uint32_t pv;
+
+    primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()) {} 
+};

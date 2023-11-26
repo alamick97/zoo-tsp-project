@@ -43,16 +43,15 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	
 //reads in vertex info via cin, stores them.
 void Zoo::readInput() {
-	uint32_t numVertices;
 	int x, y;
 
-	std::cin >> numVertices;
-	std::vector<Vertex> vertices(numVertices);	
+	std::cin >> _num_vertices;
+	_vertices.reserve(_num_vertices);
 
-	for (uint32_t i = 0; i < numVertices; ++i) { //creates vector of vertices.
+	for (uint32_t i = 0; i < _num_vertices; ++i) { //creates vector of vertices.
 		std::cin >> x >> y;
 		Category cat = getCategory(x, y);
-		vertices.emplace_back(Vertex{x, y, i, cat});
+		_vertices.emplace_back(Vertex{x, y, cat}); //no need to store id. vector index is id.
 	}
 } //readInput()
 
@@ -60,15 +59,71 @@ void Zoo::runMST() {
 	//TODO: Implement.
 	/*pseudo:
 	*/
-
+	primsLinear();
 } //runMST()
 
+void Zoo::primsLinear() {
+	initPrimsTable();
+	uint32_t true_count = 0;
+	uint32_t prev_id;
+
+	while (true_count < _num_vertices) {
+		double minDist = std::numeric_limits<double>::infinity();
+		uint32_t id;
+
+		//find smallest dist
+		for (uint32_t i = 0; i < _num_vertices; i++) {
+			if (_primsTable[i].kv == false) {
+				if (_primsTable[i].dv < minDist) {
+					minDist = _primsTable[i].dv;
+					id = i;
+				}
+			}
+		}
+
+		//update table (set smallest to T). update k
+		_primsTable[id].kv = true;
+		true_count++;
+
+		//update d,p
+		for (uint32_t i = 0; i < _num_vertices; i++) {
+			if (_primsTable[i].kv == false) {
+				Vertex v1 = _vertices[i];
+				Vertex v2 = _vertices[id];
+				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
+					(v1.cat == Category::Wild && v2.cat == Category::Safe))) {
+						double oldDist = _primsTable[i].dv;
+						double newDist = getDistance(v1, v2);
+						if (newDist > oldDist) { 
+							_primsTable[i].dv = newDist; 
+							if (id != _arbitrary_root_id) { _primsTable[i].pv = id; }
+						}
+				}
+			}
+		}
+	}
+}
+
+void Zoo::initPrimsTable() {
+	//set arbitrary root kv to True (& dv to 0?)
+	_arbitrary_root_id = 0;
+	_primsTable.resize(_num_vertices);
+	_primsTable[_arbitrary_root_id].dv = 0;
+}
+
+//helper func
 Category Zoo::getCategory(int x, int y) {
 	if (x < 0 && y < 0) {
 		return Category::Wild;
 	} else if ((y == 0 && x <= 0) || (x == 0 && y <= 0)) {
 		return Category::WallCage;
 	}
+	return Category::Safe;
+}
 
-	return Category::Domestic;
+double Zoo::getDistance(Vertex v1, Vertex v2) {
+	int a = v1.x;
+	int b = v2.y;
+
+	return std::sqrt(static_cast<double>((a * a) + (b * b)));
 }
