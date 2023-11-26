@@ -41,27 +41,34 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 } //Zoo()
     
 	
+//reads in vertex info via cin, stores them.
 void Zoo::readInput() {
 	uint32_t numVertices;
 	int x, y;
 
-	//TODO: Store properly when necessary. 
 	std::cin >> numVertices;
-	for (uint32_t i = 0; i < numVertices; ++i) {
-		std::cin >> x >> y;
-		std::cout << i << ": (" << x << ", " << y << ")\n";
-	}
+	std::vector<Vertex> vertices(numVertices);	
 
+	for (uint32_t i = 0; i < numVertices; ++i) { //creates vector of vertices.
+		std::cin >> x >> y;
+		Category cat = getCategory(x, y);
+		vertices.emplace_back(Vertex{x, y, i, cat});
+	}
 } //readInput()
 
-void findMST() {
+void Zoo::runMST() {
 	//TODO: Implement.
-}
+	/*pseudo:
+	*/
 
-void findFASTTSP() {
-	//TODO: Implement.
-}
+} //runMST()
 
-void findOPTTSP() {
-	//TODO: Implement.
+Category Zoo::getCategory(int x, int y) {
+	if (x < 0 && y < 0) {
+		return Category::Wild;
+	} else if ((y == 0 && x <= 0) || (x == 0 && y <= 0)) {
+		return Category::WallCage;
+	}
+
+	return Category::Domestic;
 }

@@ -9,6 +9,7 @@ int main (int argc, char** argv) {
     Zoo zoo(argc, argv);
     zoo.readInput();
     //TODO: Implement part A.
+    zoo.runMST();
 
     return 0;
 }

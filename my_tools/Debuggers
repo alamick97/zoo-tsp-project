@@ -9,3 +9,22 @@ void Zoo::readInput() {
 		std::cout << "(" << x << ", " << y << ")\n";
 	}
 }
+
+
+//added 11/25/2023, 19:05
+void Zoo::readInput() {
+	uint32_t numVertices;
+	int x, y;
+
+	std::cin >> numVertices;
+	std::vector<Vertex> vertices(numVertices);	
+
+	for (uint32_t i = 0; i < numVertices; ++i) {
+		std::cin >> x >> y;
+		Category cat = getCategory(x, y);
+		vertices.emplace_back(Vertex{x, y, i, cat});
+
+		std::cout << i << ": (" << x << ", " << y << ")\n";
+	}
+
+} //readInput()
