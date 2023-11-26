@@ -54,10 +54,11 @@ public:
 
     double getDistance(Vertex v1, Vertex v2); //get euclid dist
     Category getCategory(int x, int y); //calculates & determines category
-    void initPrimsTable();
+    void initPrimsTable(uint32_t root_id); //inits via root id
     
     void readInput(); //reads input redirection via cin. 
     void runMST();
+    void printMST();
     void primsLinear(); //runs prim's linear
 };
 

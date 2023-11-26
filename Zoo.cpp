@@ -57,13 +57,16 @@ void Zoo::readInput() {
 
 void Zoo::runMST() {
 	//TODO: Implement.
-	/*pseudo:
-	*/
 	primsLinear();
+	printMST();
 } //runMST()
 
+void Zoo::printMST() {
+	//TODO: Implement.
+}
+
 void Zoo::primsLinear() {
-	initPrimsTable();
+	initPrimsTable(0);
 	uint32_t true_count = 0;
 	uint32_t prev_id;
 
@@ -104,9 +107,9 @@ void Zoo::primsLinear() {
 	}
 }
 
-void Zoo::initPrimsTable() {
+void Zoo::initPrimsTable(uint32_t root_id) {
 	//set arbitrary root kv to True (& dv to 0?)
-	_arbitrary_root_id = 0;
+	_arbitrary_root_id = root_id;
 	_primsTable.resize(_num_vertices);
 	_primsTable[_arbitrary_root_id].dv = 0;
 }
