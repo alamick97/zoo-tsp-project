@@ -37,7 +37,8 @@ struct primsTable {
     double dv;
     uint32_t pv;
 
-    primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()) {} 
+    primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()),
+                    pv(UINT32_MAX) {} 
 };
 
 class Zoo {
@@ -63,7 +64,5 @@ public:
     void printMST();
     void primsLinear(); //runs prim's linear
 };
-
-double roundToHundredths(double n);
 
 #endif //ZOO_H

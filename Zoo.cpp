@@ -4,7 +4,10 @@
 
 Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
     _mode_flag = false;
-    _mode = Mode::Unspecified;
+	_mode = Mode::Unspecified;
+	_num_vertices = 0;
+	_arbitrary_root_id = 0;
+	_dv_sum = 0;
 
     int opt;
 	int opt_idx;
@@ -61,7 +64,8 @@ void Zoo::runMST() {
 } //runMST()
 
 void Zoo::printMST() {
-	std::cout << roundToHundredths(_dv_sum) << "\n";
+	//std::cout << roundToHundredths(_dv_sum) << "\n";
+	std::cout << _dv_sum << "\n";
 
 	for (uint32_t id = 0; id < _num_vertices; ++id) {
 		if (id != _arbitrary_root_id) { 
@@ -71,17 +75,13 @@ void Zoo::printMST() {
 	}
 }
 
-double roundToHundredths(double n) {
-	return std::round(n * 100) / 100;
-}
-
 void Zoo::primsLinear() {
-	initPrimsTable(0);
+	initPrimsTable(0); //input --> _arbitrary_root_id --> MST root.
 	uint32_t true_count = 0;
 
 	while (true_count < _num_vertices) {
 		double minDist = std::numeric_limits<double>::infinity();
-		uint32_t id = UINT32_MAX; //AG warning forced me to init to val.
+		uint32_t id = _arbitrary_root_id; //AG warning forced me to init to val.
 
 		//find smallest dist
 		for (uint32_t i = 0; i < _num_vertices; i++) {
