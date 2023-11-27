@@ -81,6 +81,7 @@ void Zoo::primsLinear() {
 	uint32_t true_count = 0;
 
 	while (true_count < _num_vertices) {
+/*
 //DEBUGGER START=======================================================
 //std::cout << "====================================================\n";
 std::cout << "round: " << true_count << "\n";
@@ -90,6 +91,7 @@ for (uint32_t id = 0; id < _num_vertices; ++id) {
 }
 std::cout << "====================================================\n";
 //DEBUGGER END=======================================================
+*/
 
 
 		double minDist = std::numeric_limits<double>::infinity();
@@ -113,8 +115,8 @@ std::cout << "====================================================\n";
 		//update dv,pv (for id, if find smaller dist, overwrite dv * pv)
 		for (uint32_t i = 0; i < _num_vertices; i++) {
 			if (_primsTable[i].kv == false) {
-				Vertex v1 = _vertices[i];
-				Vertex v2 = _vertices[id];
+				Vertex v1 = _vertices[id];
+				Vertex v2 = _vertices[i];
 				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
 					(v1.cat == Category::Wild && v2.cat == Category::Safe))) {
 						double oldDist = _primsTable[i].dv;
@@ -148,8 +150,8 @@ Category Zoo::getCategory(int x, int y) {
 }
 
 double Zoo::getDistance(Vertex v1, Vertex v2) {
-	int a = v1.x;
-	int b = v2.y;
+	int a = v2.y - v1.y;
+	int b = v2.x - v1.x;
 
 	return std::sqrt(static_cast<double>((a * a) + (b * b)));
 }

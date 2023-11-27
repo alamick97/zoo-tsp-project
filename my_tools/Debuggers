@@ -1,4 +1,28 @@
 
+//DEBUGGER START=======================================================
+//std::cout << "====================================================\n";
+std::cout << "round: " << true_count << "\n";
+uint32_t a = 0;
+for (auto& vertex : _vertices) {
+//	std::cout << "x: " << vertex.x << " y: " << vertex.y << " cat: " << vertex.cat << "\n";	
+	//std::cout << "x: " << vertex.x << " y: " << vertex.y << " cat: ";
+	std::cout << "id: " << a << " cat: ";
+	a++;
+	if (vertex.cat == Category::Wild) {
+		std::cout << "wild";
+	} else if (vertex.cat == Category::Safe) {
+		std::cout << "safe";
+	} else if (vertex.cat == Category::WallCage) {
+		std::cout << "wall cage.";
+	}
+	std::cout << "\n";
+}
+std::cout << "====================================================\n";
+//DEBUGGER END=======================================================
+
+
+
+
 //for Zoo::primsLinear()
 //std::cout << "round count: " << true_count << "\n";
 		//find smallest dist
