@@ -11,8 +11,7 @@ int main (int argc, char** argv) {
 
     Zoo zoo(argc, argv);
     zoo.readInput();
-    //TODO: Implement part A.
-    zoo.runMST();
+    zoo.runSpecifiedMode();
 
     return 0;
 }

@@ -39,6 +39,9 @@ struct primsTable {
 
     primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()),
                     pv(UINT32_MAX) {} 
+/*
+    primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()) {}
+*/
 };
 
 class Zoo {
@@ -58,11 +61,14 @@ public:
     double getDistance(Vertex v1, Vertex v2); //get euclid dist
     Category getCategory(int x, int y); //calculates & determines category
     void initPrimsTable(uint32_t root_id); //inits via root id
-    
-    void readInput(); //reads input redirection via cin. 
-    void runMST();
     void printMST();
     void primsLinear(); //runs prim's linear
+    
+    void readInput(); //reads input redirection via cin. 
+    void runSpecifiedMode();
+    void runMST();
+    void runFASTTSP();
+    void runOPTTSP();
 };
 
 #endif //ZOO_H

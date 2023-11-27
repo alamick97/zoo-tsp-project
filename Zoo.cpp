@@ -41,7 +41,7 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 		std::cerr << "See -h/--help for more details.\n";
         exit(1); 
     }
-} //Zoo()
+}
     
 	
 //reads in vertex info via cin, stores them.
@@ -56,30 +56,48 @@ void Zoo::readInput() {
 		Category cat = getCategory(x, y);
 		_vertices.emplace_back(Vertex{x, y, cat}); //no need to store id. vector index is id.
 	}
-} //readInput()
+}
+
+void Zoo::runSpecifiedMode() {
+	if (_mode == Mode::MST) {
+		runMST();
+	} else if (_mode == Mode::FASTTSP) {
+		runFASTTSP();
+	} else if (_mode == Mode::OPTTSP) {
+		runOPTTSP();
+	}
+}
 
 void Zoo::runMST() {
 	primsLinear();
 	printMST();
-} //runMST()
+} 
+
+void Zoo::runFASTTSP() {
+	//TODO: IMPLEMENT (Part B)
+}
+
+void Zoo::runOPTTSP() {
+	//TODO: IMPLEMENT (Part C)
+}
 
 void Zoo::printMST() {
-	//std::cout << roundToHundredths(_dv_sum) << "\n";
 	std::cout << _dv_sum << "\n";
 
 	for (uint32_t id = 0; id < _num_vertices; ++id) {
+		uint32_t pv = _primsTable[id].pv;
+
 		if (id != _arbitrary_root_id) { 
-			primsTable row = _primsTable[id];
-			std::cout << id << " " << row.pv << "\n";
+			std::cout << id << " " << pv << "\n";
 		}
 	}
 }
 
 void Zoo::primsLinear() {
-	initPrimsTable(0); //input --> _arbitrary_root_id --> MST root.
+	initPrimsTable(3); //input --> _arbitrary_root_id --> MST root.
 	uint32_t true_count = 0;
 
-	while (true_count < _num_vertices) {
+	for (uint32_t i = 0; i < _num_vertices; ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id = _arbitrary_root_id; //AG warning forced me to init to val.
 
@@ -95,7 +113,6 @@ void Zoo::primsLinear() {
 
 		//update table (set smallest to T). update k
 		_primsTable[id].kv = true;
-		true_count++;
 		_dv_sum += _primsTable[id].dv;
 
 		//update dv,pv (for id, if find smaller dist, overwrite dv * pv)
@@ -109,7 +126,7 @@ void Zoo::primsLinear() {
 						double newDist = getDistance(v1, v2);
 						if (newDist < oldDist) { 
 							_primsTable[i].dv = newDist; 
-							if (id != _arbitrary_root_id) { _primsTable[i].pv = id; }
+							_primsTable[i].pv = id;
 						}
 				}
 			}
