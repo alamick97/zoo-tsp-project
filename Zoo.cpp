@@ -75,31 +75,31 @@ void Zoo::primsLinear() {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id;
 
-std::cout << "round count: " << true_count << "\n";
+//std::cout << "round count: " << true_count << "\n";
 		//find smallest dist
 		for (uint32_t i = 0; i < _num_vertices; i++) {
-std::cout << "i: " << i << "\n";
+//std::cout << "i: " << i << "\n";
 			if (_primsTable[i].kv == false) {
-std::cout << "prims is false\n";
-std::cout << "dv: " << _primsTable[i].dv << "\n";
+//std::cout << "prims is false\n";
+//std::cout << "dv: " << _primsTable[i].dv << "\n";
 				if (_primsTable[i].dv < minDist) {
-std::cout << "dv is less than minDist\n";
+//std::cout << "dv is less than minDist\n";
 					minDist = _primsTable[i].dv;
 					id = i;
 				}
 			}
-std::cout << "minDist: " << minDist << "\n";
+//std::cout << "minDist: " << minDist << "\n";
 		}
 
 
-std::cout << "id: " << id << "\n"; //DEBUGGER
+//std::cout << "id: " << id << "\n"; //DEBUGGER
 
 		//update table (set smallest to T). update k
 		_primsTable[id].kv = true;
 		true_count++;
 		_dv_sum += _primsTable[id].dv;
 
-		//update d,p
+		//update dv,pv (for id, if find smaller dist, overwrite dv * pv)
 		for (uint32_t i = 0; i < _num_vertices; i++) {
 			if (_primsTable[i].kv == false) {
 				Vertex v1 = _vertices[i];
@@ -107,8 +107,10 @@ std::cout << "id: " << id << "\n"; //DEBUGGER
 				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
 					(v1.cat == Category::Wild && v2.cat == Category::Safe))) {
 						double oldDist = _primsTable[i].dv;
+std::cout << "oldDist: " << oldDist << "\n";
 						double newDist = getDistance(v1, v2);
-						if (newDist > oldDist) { 
+std::cout << "newDist: " << newDist << "\n";
+						if (newDist < oldDist) { 
 							_primsTable[i].dv = newDist; 
 							if (id != _arbitrary_root_id) { _primsTable[i].pv = id; }
 						}
