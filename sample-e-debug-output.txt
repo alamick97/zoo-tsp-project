@@ -5,7 +5,7 @@ table, the "PL" column is permLength.
 
 To create the table, the code looks something like this:
 // Do this once, in main()
-cerr << fixed << showpoint << setprecision(2);
+cerr << fixed << showpoint << setprecision(2) << boolalpha;
 
 // Do this inside of promising:
 for (size_t i = 0; i < path.size(); ++i)

@@ -64,35 +64,46 @@ void Zoo::runMST() {
 void Zoo::printMST() {
 	//TODO: Implement.
 	std::cout << _dv_sum << "\n";
+	/*pseudo:
+	for (each node):
+		cout pv + " " dv + "\n"
+	*/
+	for (uint32_t id = 0; id < _num_vertices; ++id) {
+		if (id != _arbitrary_root_id) { 
+			primsTable row = _primsTable[id];
+			std::cout << id << " " << row.pv << "\n";
+		}
+	}
 }
 
 void Zoo::primsLinear() {
-	initPrimsTable(3);
+	initPrimsTable(0);
 	uint32_t true_count = 0;
-	uint32_t prev_id;
 
 	while (true_count < _num_vertices) {
+//DEBUGGER START=======================================================
+//std::cout << "====================================================\n";
+std::cout << "round: " << true_count << "\n";
+for (uint32_t id = 0; id < _num_vertices; ++id) {
+	primsTable row = _primsTable[id];
+	std::cout << "id: " << id << " | kv: " <<  row.kv << " | dv: " << row.dv << "|\n";
+}
+std::cout << "====================================================\n";
+//DEBUGGER END=======================================================
+
+
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id;
 
-//std::cout << "round count: " << true_count << "\n";
 		//find smallest dist
 		for (uint32_t i = 0; i < _num_vertices; i++) {
-//std::cout << "i: " << i << "\n";
 			if (_primsTable[i].kv == false) {
-//std::cout << "prims is false\n";
-//std::cout << "dv: " << _primsTable[i].dv << "\n";
 				if (_primsTable[i].dv < minDist) {
-//std::cout << "dv is less than minDist\n";
 					minDist = _primsTable[i].dv;
 					id = i;
 				}
 			}
-//std::cout << "minDist: " << minDist << "\n";
 		}
-
-
-//std::cout << "id: " << id << "\n"; //DEBUGGER
 
 		//update table (set smallest to T). update k
 		_primsTable[id].kv = true;
@@ -107,9 +118,7 @@ void Zoo::primsLinear() {
 				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
 					(v1.cat == Category::Wild && v2.cat == Category::Safe))) {
 						double oldDist = _primsTable[i].dv;
-std::cout << "oldDist: " << oldDist << "\n";
 						double newDist = getDistance(v1, v2);
-std::cout << "newDist: " << newDist << "\n";
 						if (newDist < oldDist) { 
 							_primsTable[i].dv = newDist; 
 							if (id != _arbitrary_root_id) { _primsTable[i].pv = id; }
