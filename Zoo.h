@@ -5,6 +5,7 @@
 #include <tuple>
 #include <limits>
 #include <cstring>
+#include <cstdint> //UINT32_MAX
 #include <cmath> //sqrt, round
 #include <getopt.h>
 

@@ -81,7 +81,7 @@ void Zoo::primsLinear() {
 
 	while (true_count < _num_vertices) {
 		double minDist = std::numeric_limits<double>::infinity();
-		uint32_t id;
+		uint32_t id = UINT32_MAX; //AG warning forced me to init to val.
 
 		//find smallest dist
 		for (uint32_t i = 0; i < _num_vertices; i++) {
