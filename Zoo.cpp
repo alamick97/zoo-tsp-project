@@ -63,10 +63,11 @@ void Zoo::runMST() {
 
 void Zoo::printMST() {
 	//TODO: Implement.
+	std::cout << _dv_sum << "\n";
 }
 
 void Zoo::primsLinear() {
-	initPrimsTable(0);
+	initPrimsTable(3);
 	uint32_t true_count = 0;
 	uint32_t prev_id;
 
@@ -74,19 +75,29 @@ void Zoo::primsLinear() {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id;
 
+std::cout << "round count: " << true_count << "\n";
 		//find smallest dist
 		for (uint32_t i = 0; i < _num_vertices; i++) {
+std::cout << "i: " << i << "\n";
 			if (_primsTable[i].kv == false) {
+std::cout << "prims is false\n";
+std::cout << "dv: " << _primsTable[i].dv << "\n";
 				if (_primsTable[i].dv < minDist) {
+std::cout << "dv is less than minDist\n";
 					minDist = _primsTable[i].dv;
 					id = i;
 				}
 			}
+std::cout << "minDist: " << minDist << "\n";
 		}
+
+
+std::cout << "id: " << id << "\n"; //DEBUGGER
 
 		//update table (set smallest to T). update k
 		_primsTable[id].kv = true;
 		true_count++;
+		_dv_sum += _primsTable[id].dv;
 
 		//update d,p
 		for (uint32_t i = 0; i < _num_vertices; i++) {
@@ -109,6 +120,7 @@ void Zoo::primsLinear() {
 
 void Zoo::initPrimsTable(uint32_t root_id) {
 	//set arbitrary root kv to True (& dv to 0?)
+	_dv_sum = 0;
 	_arbitrary_root_id = root_id;
 	_primsTable.resize(_num_vertices);
 	_primsTable[_arbitrary_root_id].dv = 0;
