@@ -5,7 +5,7 @@
 #include <tuple>
 #include <limits>
 #include <cstring>
-#include <cmath> //sqrt
+#include <cmath> //sqrt, round
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -63,5 +63,6 @@ public:
     void primsLinear(); //runs prim's linear
 };
 
+double roundToHundredths(double n);
 
 #endif //ZOO_H

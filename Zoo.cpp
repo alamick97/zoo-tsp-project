@@ -56,18 +56,13 @@ void Zoo::readInput() {
 } //readInput()
 
 void Zoo::runMST() {
-	//TODO: Implement.
 	primsLinear();
 	printMST();
 } //runMST()
 
 void Zoo::printMST() {
-	//TODO: Implement.
-	std::cout << _dv_sum << "\n";
-	/*pseudo:
-	for (each node):
-		cout pv + " " dv + "\n"
-	*/
+	std::cout << roundToHundredths(_dv_sum) << "\n";
+
 	for (uint32_t id = 0; id < _num_vertices; ++id) {
 		if (id != _arbitrary_root_id) { 
 			primsTable row = _primsTable[id];
@@ -76,24 +71,15 @@ void Zoo::printMST() {
 	}
 }
 
+double roundToHundredths(double n) {
+	return std::round(n * 100) / 100;
+}
+
 void Zoo::primsLinear() {
 	initPrimsTable(0);
 	uint32_t true_count = 0;
 
 	while (true_count < _num_vertices) {
-/*
-//DEBUGGER START=======================================================
-//std::cout << "====================================================\n";
-std::cout << "round: " << true_count << "\n";
-for (uint32_t id = 0; id < _num_vertices; ++id) {
-	primsTable row = _primsTable[id];
-	std::cout << "id: " << id << " | kv: " <<  row.kv << " | dv: " << row.dv << "|\n";
-}
-std::cout << "====================================================\n";
-//DEBUGGER END=======================================================
-*/
-
-
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id;
 
