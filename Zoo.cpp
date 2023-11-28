@@ -7,7 +7,7 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	_mode = Mode::Unspecified;
 	_num_vertices = 0;
 	_arbitrary_root_id = 0;
-	_dv_sum = 0;
+	_mst_tot_dist = 0;
 
     int opt;
 	int opt_idx;
@@ -82,7 +82,7 @@ void Zoo::runOPTTSP() {
 }
 
 void Zoo::printMST() {
-	std::cout << _dv_sum << "\n";
+	std::cout << _mst_tot_dist << "\n";
 
 	for (uint32_t id = 0; id < _num_vertices; ++id) {
 		uint32_t pv = _primsTable[id].pv;
@@ -94,31 +94,32 @@ void Zoo::printMST() {
 }
 
 void Zoo::primsLinear() {
-	initPrimsTable(3); //input --> _arbitrary_root_id --> MST root.
-	uint32_t true_count = 0;
+	initPrimsTable(0); //sets _arbitrary_root_id & inits
 
 	for (uint32_t i = 0; i < _num_vertices; ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
-		uint32_t id = _arbitrary_root_id; //AG warning forced me to init to val.
+		uint32_t id_min = _arbitrary_root_id; //AG warning forced me to init to val.
 
-		//find smallest dist
+		//get shortest dist (find id_min)
 		for (uint32_t i = 0; i < _num_vertices; i++) {
 			if (_primsTable[i].kv == false) {
 				if (_primsTable[i].dv < minDist) {
 					minDist = _primsTable[i].dv;
-					id = i;
+					id_min = i;
 				}
 			}
 		}
 
-		//update table (set smallest to T). update k
-		_primsTable[id].kv = true;
-		_dv_sum += _primsTable[id].dv;
+		//update kv (for id_min)
+		_primsTable[id_min].kv = true;
 
-		//update dv,pv (for id, if find smaller dist, overwrite dv * pv)
+		//update total dist
+		_mst_tot_dist += _primsTable[id_min].dv;
+
+		Vertex v1 = _vertices[id_min];
+		//update dv,pv (for id_min)
 		for (uint32_t i = 0; i < _num_vertices; i++) {
 			if (_primsTable[i].kv == false) {
-				Vertex v1 = _vertices[id];
 				Vertex v2 = _vertices[i];
 				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
 					(v1.cat == Category::Wild && v2.cat == Category::Safe))) {
@@ -126,7 +127,7 @@ void Zoo::primsLinear() {
 						double newDist = getDistance(v1, v2);
 						if (newDist < oldDist) { 
 							_primsTable[i].dv = newDist; 
-							_primsTable[i].pv = id;
+							_primsTable[i].pv = id_min;
 						}
 				}
 			}
@@ -136,7 +137,7 @@ void Zoo::primsLinear() {
 
 void Zoo::initPrimsTable(uint32_t root_id) {
 	//set arbitrary root kv to True (& dv to 0?)
-	_dv_sum = 0;
+	//_mst_tot_dist = 0;
 	_arbitrary_root_id = root_id;
 	_primsTable.resize(_num_vertices);
 	_primsTable[_arbitrary_root_id].dv = 0;
@@ -153,8 +154,12 @@ Category Zoo::getCategory(int x, int y) {
 }
 
 double Zoo::getDistance(Vertex v1, Vertex v2) {
-	int a = v2.y - v1.y;
-	int b = v2.x - v1.x;
+	double x1 = v1.x;
+	double x2 = v2.x;
+	double y1 = v1.y;
+	double y2 = v2.y;
+	double a = y2 - y1;
+	double b = x2 - x1;
 
-	return std::sqrt(static_cast<double>((a * a) + (b * b)));
+	return std::sqrt(static_cast<double>((a * a) + (b * b)));	
 }

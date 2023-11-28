@@ -51,7 +51,7 @@ class Zoo {
     Mode _mode;
     uint32_t _num_vertices;
     uint32_t _arbitrary_root_id;
-    double _dv_sum; //prim's table dist sum.
+    double _mst_tot_dist; //sum of prim's table dists.
 
     std::vector<Vertex> _vertices;
     std::vector<primsTable> _primsTable;
