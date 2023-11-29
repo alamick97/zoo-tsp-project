@@ -87,15 +87,8 @@ void Zoo::christofidesAlg() {
 	//step 1: find odd degree vertices in MST
 	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
 
-/*
-//DEBUGGER===============(testing getOddVertices)=======
-	for (auto& v : odd_vertices) {
-		std::cout << v << "\n";
-	}
-//DEBUGGER===============(testing getOddVertices)=======
-*/
-	
 	//step 2: find MWPM amongst odd deg vertices
+	findMWPM(odd_vertices);
 
 	//step 3: combine MST and MWPM
 
@@ -104,6 +97,29 @@ void Zoo::christofidesAlg() {
 	//step 5: convert to hamiltonian circuit 
 
 }
+
+//============WIP ZONE START===========================================
+void Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
+	std::vector<Edge> potentialEdges; //set size to (v^2)/2?
+
+	//step 1: Create a list of all possible pairs of odd-degree vertices with their corr. edge weights
+	for (uint32_t u : odd_vertices) {
+		for (uint32_t v : odd_vertices) {
+			if (u < v) {
+				potentialEdges.emplace_back(u, v, getDistance(_vertices[u], _vertices[v]));
+			}
+		}
+	}
+
+	//step 2: sort the list based on edge weights in asc. order
+	/*pseudo:
+		- use a PQ
+	*/
+
+
+	//
+}
+//============WIP ZONE END=============================================
 
 std::unordered_set<uint32_t> Zoo::getOddVertices() {
 	primsLinear(); //generates MST	

@@ -8,6 +8,7 @@
 #include <cstdint> //UINT32_MAX
 #include <cmath> //sqrt, round
 #include <unordered_set>
+#include <queue>
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -40,9 +41,12 @@ struct primsTable {
 
     primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()),
                     pv(UINT32_MAX) {} 
-/*
-    primsTable() : kv(false), dv(std::numeric_limits<double>::infinity()) {}
-*/
+};
+
+struct Edge {
+    uint32_t u, v;
+    double dist;
+    Edge(uint32_t u, uint32_t v, double dist) : u(u), v(v), dist(dist) {}
 };
 
 class Zoo {
@@ -66,6 +70,7 @@ public:
     void primsLinear();
     void christofidesAlg(); //run Christofide's Algorithm
     std::unordered_set<uint32_t> getOddVertices(); //count # of odd degree vertices
+    void findMWPM(std::unordered_set<uint32_t> odd_vertices); //Minimum-Weight Perfect Matching (christofides step 2)
     
     void readInput(); //reads input redirection via cin. 
     void runSpecifiedMode();
