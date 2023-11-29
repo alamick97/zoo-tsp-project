@@ -95,8 +95,8 @@ void Zoo::randInsTSP() {
 				("bc then, however u pick the nxt one, u have a plc to insrt it")
 	*/
 	_fast_tsp_path.reserve(_num_vertices + 1);	
-	_fast_tsp_path[0] = 0; //root id (start)
-	_fast_tsp_path[1] = 0; //root id (end)
+	_fast_tsp_path.push_back(0); //root id (start)
+	_fast_tsp_path.push_back(0); //root id (end)
 
 	for (uint32_t k = 1; k < _num_vertices; ++k) {
 		double minDist = std::numeric_limits<double>::infinity();
