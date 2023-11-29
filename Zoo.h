@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 #include <tuple>
-#include <limits>
+#include <limits> //numeric_limits<double>
 #include <cstring>
 #include <cstdint> //UINT32_MAX
 #include <cmath> //sqrt, round
 #include <unordered_set>
-#include <algorithm> //sort
+#include <algorithm> //sort, min
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -61,20 +61,25 @@ class Zoo {
     uint32_t _num_vertices;
     uint32_t _arbitrary_root_id;
     double _mst_tot_dist; //sum of prim's table dists.
+    double _fast_tot_dist;
 
     std::vector<Vertex> _vertices;
     std::vector<primsTable> _primsTable;
+    std::vector<uint32_t> _fast_tsp_path;
 public:
     Zoo(int argc, char** argv);
 
     double getDistance(Vertex v1, Vertex v2); //get euclid dist
+    double getCost(uint32_t i, uint32_t k, uint32_t j);
     Category getCategory(int x, int y); //calculates & determines category
     void initPrimsTable(); //inits via root id
     void printMST();
     void primsLinear();
-    void christofidesAlg(); //run Christofide's Algorithm
-    std::unordered_set<uint32_t> getOddVertices(); //count # of odd degree vertices
-    std::vector<Edge> findMWPM(std::unordered_set<uint32_t> odd_vertices); //Minimum-Weight Perfect Matching (christofides step 2)
+    void randInsTSP();
+    void printFastTSP();
+    //void christofidesAlg(); //run Christofide's Algorithm
+    //std::unordered_set<uint32_t> getOddVertices(); //count # of odd degree vertices
+    //std::vector<Edge> findMWPM(std::unordered_set<uint32_t> odd_vertices); //Minimum-Weight Perfect Matching (christofides step 2)
     
     void readInput(); //reads input redirection via cin. 
     void runSpecifiedMode();

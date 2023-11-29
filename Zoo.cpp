@@ -8,6 +8,7 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	_num_vertices = 0;
 	_arbitrary_root_id = 0;
 	_mst_tot_dist = 0;
+	_fast_tot_dist = 0;
 
     int opt;
 	int opt_idx;
@@ -75,14 +76,69 @@ void Zoo::runMST() {
 
 void Zoo::runFASTTSP() {
 	//TODO: IMPLEMENT (Part B)
-	//Cristofedes Alg
-	christofidesAlg();
+	randInsTSP();
+	printFastTSP();	
 }
 
 void Zoo::runOPTTSP() {
 	//TODO: IMPLEMENT (Part C)
 }
 
+/*
+- uses random insertion heuristic to find first rand tour w/ dist < (2 * MST dist)
+*/
+void Zoo::randInsTSP() {
+	//TODO: Finish
+	/*
+	algorithm ref: https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/03634d989704c2607e6f48a182d455a0_lec16.pdf
+
+	P says:
+	 	[x] make a vec of IDX/ID's (NOT a vec of coord.!)
+		[x] for ins heur:
+			[x] init path as {0, 0}
+				("bc then, however u pick the nxt one, u have a plc to insrt it")
+	*/
+	_fast_tsp_path.reserve(_num_vertices + 1);	
+	_fast_tsp_path[0] = 0; //root id (start)
+	_fast_tsp_path[1] = 0; //root id (end)
+
+	for (uint32_t k = 1; k < _num_vertices; ++k) {
+		double minDist = std::numeric_limits<double>::infinity();
+		uint32_t idx = UINT32_MAX;
+
+		for (uint32_t i = 0; i < _fast_tsp_path.size() - 1; ++i) {
+			uint32_t j = i + 1;
+			double cost = getCost(i, k, j);
+
+			if (cost < minDist) {
+				minDist = cost;
+				idx = j; //idx to insert
+			}
+		}
+
+		_fast_tot_dist += minDist;	
+		_fast_tsp_path.insert(_fast_tsp_path.begin() + idx, k);
+	}
+}
+
+void Zoo::printFastTSP() {
+	//TODO: Finish
+	/*pseudo
+		[x] pop 0 off before printing
+	*/
+	_fast_tsp_path.pop_back(); //removes trailing 0
+}
+
+double Zoo::getCost(uint32_t i, uint32_t k, uint32_t j) {
+	Vertex v1 = _vertices[i];
+	Vertex v2 = _vertices[k];
+	Vertex v3 = _vertices[j];
+	double c = getDistance(v2, v1) + getDistance(v3, v2) - getDistance(v3, v1);
+
+	return c;
+}
+
+/*
 void Zoo::christofidesAlg() {
 	//step 1: find odd degree vertices in MST
 	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
@@ -97,7 +153,9 @@ void Zoo::christofidesAlg() {
 	//step 5: convert to hamiltonian circuit 
 
 }
+*/
 
+/*
 //greedy mwpm approach
 std::vector<Edge> Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
 	std::vector<Edge> potentialEdges; //set size to (v^2)/2?
@@ -128,7 +186,9 @@ std::vector<Edge> Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
 
 	return mwpm;
 }
+*/
 
+/*
 std::unordered_set<uint32_t> Zoo::getOddVertices() {
 	primsLinear(); //generates MST	
 
@@ -150,6 +210,7 @@ std::unordered_set<uint32_t> Zoo::getOddVertices() {
 
 	return odd_vertices;
 }
+*/
 
 void Zoo::printMST() {
 	std::cout << _mst_tot_dist << "\n";
