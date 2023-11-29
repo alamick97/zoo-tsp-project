@@ -75,7 +75,6 @@ void Zoo::runMST() {
 } 
 
 void Zoo::runFASTTSP() {
-	//TODO: IMPLEMENT (Part B)
 	randInsTSP();
 	printFastTSP();	
 }
@@ -84,13 +83,10 @@ void Zoo::runOPTTSP() {
 	//TODO: IMPLEMENT (Part C)
 }
 
-/*
-- uses random insertion heuristic to find first rand tour w/ dist < (2 * MST dist)
-*/
 void Zoo::randInsTSP() {
-	//TODO: Finish
 	/*
-	algorithm ref: https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/03634d989704c2607e6f48a182d455a0_lec16.pdf
+	algorithm ref (random insertion heuristic): 
+		- https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/03634d989704c2607e6f48a182d455a0_lec16.pdf
 
 	P says:
 	 	[x] make a vec of IDX/ID's (NOT a vec of coord.!)
@@ -123,10 +119,18 @@ void Zoo::randInsTSP() {
 
 void Zoo::printFastTSP() {
 	//TODO: Finish
-	/*pseudo
+	/*pseudo:
+		[x] print total dist
+		[x] print path
+
+	P says:
 		[x] pop 0 off before printing
 	*/
 	_fast_tsp_path.pop_back(); //removes trailing 0
+
+	std::cout << _fast_tot_dist << "\n";
+	for (uint32_t id : _fast_tsp_path) { std::cout << id << " "; }
+	std::cout << "\n";
 }
 
 double Zoo::getCost(uint32_t i, uint32_t k, uint32_t j) {
