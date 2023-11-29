@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cstdint> //UINT32_MAX
 #include <cmath> //sqrt, round
+#include <unordered_set>
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -60,9 +61,11 @@ public:
 
     double getDistance(Vertex v1, Vertex v2); //get euclid dist
     Category getCategory(int x, int y); //calculates & determines category
-    void initPrimsTable(uint32_t root_id); //inits via root id
+    void initPrimsTable(); //inits via root id
     void printMST();
-    void primsLinear(); //runs prim's linear
+    void primsLinear();
+    void christofidesAlg(); //run Christofide's Algorithm
+    std::unordered_set<uint32_t> getOddVertices(); //count # of odd degree vertices
     
     void readInput(); //reads input redirection via cin. 
     void runSpecifiedMode();

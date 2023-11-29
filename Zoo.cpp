@@ -75,10 +75,54 @@ void Zoo::runMST() {
 
 void Zoo::runFASTTSP() {
 	//TODO: IMPLEMENT (Part B)
+	//Cristofedes Alg
+	christofidesAlg();
 }
 
 void Zoo::runOPTTSP() {
 	//TODO: IMPLEMENT (Part C)
+}
+
+void Zoo::christofidesAlg() {
+	//step 1: find odd degree vertices in MST
+	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
+
+//DEBUGGER===============(testing getOddVertices)=======
+	for (auto& v : odd_vertices) {
+		std::cout << v << "\n";
+	}
+//DEBUGGER===============(testing getOddVertices)=======
+	
+	//step 2: find MWPM amongst odd deg vertices
+
+	//step 3: combine MST and MWPM
+
+	//step 4: find eulerian circuit
+
+	//step 5: convert to hamiltonian circuit 
+
+}
+
+std::unordered_set<uint32_t> Zoo::getOddVertices() {
+	std::vector<uint32_t> count(_num_vertices, 1);
+	count[_arbitrary_root_id] = 0; //MST root 
+
+	for (uint32_t id = 0; id < _num_vertices; ++id) {
+		primsTable row = _primsTable[id];
+
+		if (id != _arbitrary_root_id) {
+			count[row.pv]++;	
+		}
+	}	
+
+	std::unordered_set<uint32_t> odd_vertices;
+	for (uint32_t id = 0; id < _num_vertices; ++id) {
+		if (count[id] % 2 != 0) {
+			odd_vertices.insert(id);
+		}
+	}
+
+	return odd_vertices;
 }
 
 void Zoo::printMST() {
@@ -94,7 +138,7 @@ void Zoo::printMST() {
 }
 
 void Zoo::primsLinear() {
-	initPrimsTable(0); //sets _arbitrary_root_id & inits
+	initPrimsTable();
 
 	for (uint32_t i = 0; i < _num_vertices; ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
@@ -135,10 +179,7 @@ void Zoo::primsLinear() {
 	}
 }
 
-void Zoo::initPrimsTable(uint32_t root_id) {
-	//set arbitrary root kv to True (& dv to 0?)
-	//_mst_tot_dist = 0;
-	_arbitrary_root_id = root_id;
+void Zoo::initPrimsTable() {
 	_primsTable.resize(_num_vertices);
 	_primsTable[_arbitrary_root_id].dv = 0;
 }
