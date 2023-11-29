@@ -113,6 +113,7 @@ void Zoo::randInsTSP() {
 		}
 
 		_fast_tot_dist += minDist;	
+std::cout << "fast tot dist: " << _fast_tot_dist << "\n";
 		_fast_tsp_path.insert(_fast_tsp_path.begin() + idx, k);
 	}
 }
@@ -141,80 +142,6 @@ double Zoo::getCost(uint32_t i, uint32_t k, uint32_t j) {
 
 	return c;
 }
-
-/*
-void Zoo::christofidesAlg() {
-	//step 1: find odd degree vertices in MST
-	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
-
-	//step 2: find MWPM amongst odd deg vertices
-	std::vector<Edge> mwpm = findMWPM(odd_vertices);
-
-	//step 3: combine MST and MWPM
-
-	//step 4: find eulerian circuit
-
-	//step 5: convert to hamiltonian circuit 
-
-}
-*/
-
-/*
-//greedy mwpm approach
-std::vector<Edge> Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
-	std::vector<Edge> potentialEdges; //set size to (v^2)/2?
-
-	//step 1: create list of all possible odd-deg vert & their corr. edges
-	for (uint32_t u : odd_vertices) {
-		for (uint32_t v : odd_vertices) {
-			if (u < v) {
-				potentialEdges.emplace_back(u, v, getDistance(_vertices[u], _vertices[v]));
-			}
-		}
-	}
-
-	//step 2: sort the list based on edge weights in asc. order
-	std::sort(potentialEdges.begin(), potentialEdges.end(), compareEdges);
-
-	//step 3: select/match edges to form MWPM
-	std::unordered_set<uint32_t> matched;
-	std::vector<Edge> mwpm;
-	for (const Edge& edge : potentialEdges) {
-		if (matched.find(edge.u) == matched.end() &&
-			matched.find(edge.v) == matched.end()) {
-				mwpm.push_back(edge);
-				matched.insert(edge.u);
-				matched.insert(edge.v);
-		}
-	}
-
-	return mwpm;
-}
-*/
-
-/*
-std::unordered_set<uint32_t> Zoo::getOddVertices() {
-	primsLinear(); //generates MST	
-
-	std::vector<uint32_t> count(_num_vertices, 1);
-	count[0] = 0; //MST root 
-
-	for (uint32_t id = 1; id < _num_vertices; ++id) {
-		uint32_t pv = _primsTable[id].pv;
-		count[pv]++;
-	}	
-
-	std::unordered_set<uint32_t> odd_vertices;
-
-	for (uint32_t id = 0; id < _num_vertices; ++id) {
-		if (count[id] % 2 != 0) {
-			odd_vertices.insert(id);
-		}
-	}
-
-	return odd_vertices;
-}
-*/
 
 void Zoo::printMST() {
 	std::cout << _mst_tot_dist << "\n";
@@ -295,3 +222,77 @@ double Zoo::getDistance(Vertex v1, Vertex v2) {
 
 	return std::sqrt(static_cast<double>((a * a) + (b * b)));	
 }
+
+/*
+void Zoo::christofidesAlg() {
+	//step 1: find odd degree vertices in MST
+	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
+
+	//step 2: find MWPM amongst odd deg vertices
+	std::vector<Edge> mwpm = findMWPM(odd_vertices);
+
+	//step 3: combine MST and MWPM
+
+	//step 4: find eulerian circuit
+
+	//step 5: convert to hamiltonian circuit 
+
+}
+*/
+
+/*
+//greedy mwpm approach
+std::vector<Edge> Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
+	std::vector<Edge> potentialEdges; //set size to (v^2)/2?
+
+	//step 1: create list of all possible odd-deg vert & their corr. edges
+	for (uint32_t u : odd_vertices) {
+		for (uint32_t v : odd_vertices) {
+			if (u < v) {
+				potentialEdges.emplace_back(u, v, getDistance(_vertices[u], _vertices[v]));
+			}
+		}
+	}
+
+	//step 2: sort the list based on edge weights in asc. order
+	std::sort(potentialEdges.begin(), potentialEdges.end(), compareEdges);
+
+	//step 3: select/match edges to form MWPM
+	std::unordered_set<uint32_t> matched;
+	std::vector<Edge> mwpm;
+	for (const Edge& edge : potentialEdges) {
+		if (matched.find(edge.u) == matched.end() &&
+			matched.find(edge.v) == matched.end()) {
+				mwpm.push_back(edge);
+				matched.insert(edge.u);
+				matched.insert(edge.v);
+		}
+	}
+
+	return mwpm;
+}
+*/
+
+/*
+std::unordered_set<uint32_t> Zoo::getOddVertices() {
+	primsLinear(); //generates MST	
+
+	std::vector<uint32_t> count(_num_vertices, 1);
+	count[0] = 0; //MST root 
+
+	for (uint32_t id = 1; id < _num_vertices; ++id) {
+		uint32_t pv = _primsTable[id].pv;
+		count[pv]++;
+	}	
+
+	std::unordered_set<uint32_t> odd_vertices;
+
+	for (uint32_t id = 0; id < _num_vertices; ++id) {
+		if (count[id] % 2 != 0) {
+			odd_vertices.insert(id);
+		}
+	}
+
+	return odd_vertices;
+}
+*/
