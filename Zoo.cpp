@@ -87,11 +87,13 @@ void Zoo::christofidesAlg() {
 	//step 1: find odd degree vertices in MST
 	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
 
+/*
 //DEBUGGER===============(testing getOddVertices)=======
 	for (auto& v : odd_vertices) {
 		std::cout << v << "\n";
 	}
 //DEBUGGER===============(testing getOddVertices)=======
+*/
 	
 	//step 2: find MWPM amongst odd deg vertices
 
@@ -104,18 +106,18 @@ void Zoo::christofidesAlg() {
 }
 
 std::unordered_set<uint32_t> Zoo::getOddVertices() {
+	primsLinear(); //generates MST	
+
 	std::vector<uint32_t> count(_num_vertices, 1);
-	count[_arbitrary_root_id] = 0; //MST root 
+	count[0] = 0; //MST root 
 
-	for (uint32_t id = 0; id < _num_vertices; ++id) {
-		primsTable row = _primsTable[id];
-
-		if (id != _arbitrary_root_id) {
-			count[row.pv]++;	
-		}
+	for (uint32_t id = 1; id < _num_vertices; ++id) {
+		uint32_t pv = _primsTable[id].pv;
+		count[pv]++;
 	}	
 
 	std::unordered_set<uint32_t> odd_vertices;
+
 	for (uint32_t id = 0; id < _num_vertices; ++id) {
 		if (count[id] % 2 != 0) {
 			odd_vertices.insert(id);
