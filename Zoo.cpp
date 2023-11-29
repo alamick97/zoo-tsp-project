@@ -88,7 +88,7 @@ void Zoo::christofidesAlg() {
 	std::unordered_set<uint32_t> odd_vertices = getOddVertices();
 
 	//step 2: find MWPM amongst odd deg vertices
-	findMWPM(odd_vertices);
+	std::vector<Edge> mwpm = findMWPM(odd_vertices);
 
 	//step 3: combine MST and MWPM
 
@@ -98,11 +98,11 @@ void Zoo::christofidesAlg() {
 
 }
 
-//============WIP ZONE START===========================================
-void Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
+//greedy mwpm approach
+std::vector<Edge> Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
 	std::vector<Edge> potentialEdges; //set size to (v^2)/2?
 
-	//step 1: Create a list of all possible pairs of odd-degree vertices with their corr. edge weights
+	//step 1: create list of all possible odd-deg vert & their corr. edges
 	for (uint32_t u : odd_vertices) {
 		for (uint32_t v : odd_vertices) {
 			if (u < v) {
@@ -112,14 +112,22 @@ void Zoo::findMWPM(std::unordered_set<uint32_t> odd_vertices) {
 	}
 
 	//step 2: sort the list based on edge weights in asc. order
-	/*pseudo:
-		- use a PQ
-	*/
+	std::sort(potentialEdges.begin(), potentialEdges.end(), compareEdges);
 
+	//step 3: select/match edges to form MWPM
+	std::unordered_set<uint32_t> matched;
+	std::vector<Edge> mwpm;
+	for (const Edge& edge : potentialEdges) {
+		if (matched.find(edge.u) == matched.end() &&
+			matched.find(edge.v) == matched.end()) {
+				mwpm.push_back(edge);
+				matched.insert(edge.u);
+				matched.insert(edge.v);
+		}
+	}
 
-	//
+	return mwpm;
 }
-//============WIP ZONE END=============================================
 
 std::unordered_set<uint32_t> Zoo::getOddVertices() {
 	primsLinear(); //generates MST	

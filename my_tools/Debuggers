@@ -1,3 +1,11 @@
+//christofides algorithm:
+//==============DEBUGGER START====================================
+for (const Edge& edge : mwpm) {
+	std::cout << "Match: " << edge.u << " - " << edge.v << ", distance: " << edge.dist << "\n";
+}
+//==============DEBUGGER END======================================
+
+
 //DEBUGGER START=======================================================
 //std::cout << "====================================================\n";
 std::cout << "round: " << true_count << "\n";
