@@ -98,23 +98,24 @@ void Zoo::randInsTSP() {
 	_fast_tsp_path.push_back(0); //root id (start)
 	_fast_tsp_path.push_back(0); //root id (end)
 
-	for (uint32_t k = 1; k < _num_vertices; ++k) {
+	for (uint32_t k = 1; k < _num_vertices; ++k) { //rand vert id
 		double minDist = std::numeric_limits<double>::infinity();
-		uint32_t idx = UINT32_MAX;
+		uint32_t ins_idx = UINT32_MAX;
 
-		for (uint32_t i = 0; i < _fast_tsp_path.size() - 1; ++i) {
-			uint32_t j = i + 1;
+		for (uint32_t i_idx = 0; i_idx < _fast_tsp_path.size() - 1; ++i_idx) {
+			uint32_t j_idx = i_idx + 1;
+			uint32_t i = _fast_tsp_path[i_idx]; //idx -> id
+			uint32_t j = _fast_tsp_path[j_idx]; //idx -> id
 			double cost = getCost(i, k, j);
 
 			if (cost < minDist) {
 				minDist = cost;
-				idx = j; //idx to insert
+				ins_idx = j_idx; //idx to insert
 			}
 		}
 
 		_fast_tot_dist += minDist;	
-std::cout << "fast tot dist: " << _fast_tot_dist << "\n";
-		_fast_tsp_path.insert(_fast_tsp_path.begin() + idx, k);
+		_fast_tsp_path.insert(_fast_tsp_path.begin() + ins_idx, k);
 	}
 }
 
@@ -138,9 +139,29 @@ double Zoo::getCost(uint32_t i, uint32_t k, uint32_t j) {
 	Vertex v1 = _vertices[i];
 	Vertex v2 = _vertices[k];
 	Vertex v3 = _vertices[j];
-	double c = getDistance(v2, v1) + getDistance(v3, v2) - getDistance(v3, v1);
+	double c = getDistance(v1, v2) + getDistance(v2, v3) - getDistance(v1, v3);
 
 	return c;
+}
+
+double Zoo::getDistance(Vertex v1, Vertex v2) {
+	double x1 = v1.x;
+	double x2 = v2.x;
+	double y1 = v1.y;
+	double y2 = v2.y;
+	double a = y2 - y1;
+	double b = x2 - x1;
+
+	return std::sqrt(static_cast<double>((a * a) + (b * b)));	
+}
+
+Category Zoo::getCategory(int x, int y) {
+	if (x < 0 && y < 0) {
+		return Category::Wild;
+	} else if ((y == 0 && x <= 0) || (x == 0 && y <= 0)) {
+		return Category::WallCage;
+	}
+	return Category::Safe;
 }
 
 void Zoo::printMST() {
@@ -200,27 +221,6 @@ void Zoo::primsLinear() {
 void Zoo::initPrimsTable() {
 	_primsTable.resize(_num_vertices);
 	_primsTable[_arbitrary_root_id].dv = 0;
-}
-
-//helper func
-Category Zoo::getCategory(int x, int y) {
-	if (x < 0 && y < 0) {
-		return Category::Wild;
-	} else if ((y == 0 && x <= 0) || (x == 0 && y <= 0)) {
-		return Category::WallCage;
-	}
-	return Category::Safe;
-}
-
-double Zoo::getDistance(Vertex v1, Vertex v2) {
-	double x1 = v1.x;
-	double x2 = v2.x;
-	double y1 = v1.y;
-	double y2 = v2.y;
-	double a = y2 - y1;
-	double b = x2 - x1;
-
-	return std::sqrt(static_cast<double>((a * a) + (b * b)));	
 }
 
 /*

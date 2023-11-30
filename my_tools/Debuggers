@@ -1,3 +1,18 @@
+//DEBUGGER START=======================================================
+std::cout << "getDistance(v1, v2): " << getDistance(v1, v2) << "\n";
+std::cout << "getDistance(v2, v3): " << getDistance(v2, v3) << "\n";
+std::cout << "getDistance(v1, v3): " << getDistance(v1, v3) << "\n";
+//DEBUGGER END=========================================================
+
+//DEBUGGER END=========================================================
+std::cout << "i: " << i << "\n";
+std::cout << "j: " << j << "\n";
+std::cout << "minDist: " << minDist << "\n";
+std::cout << "cost: " << cost << "\n";
+
+std::cout << "fast tot dist: " << _fast_tot_dist << "\n";
+//DEBUGGER END=========================================================
+
 //SEGFAULTS IN HERE (below)==========================================================
 /*
 std::cout << "i: " << i << "\n";
