@@ -79,14 +79,14 @@ class Zoo {
     uint32_t _arbitrary_root_id;
     double _mst_tot_dist; //sum of prim's table dists.
     double _fast_tot;
-    double _opt_tot; //"running total"
+    double _cur_tot; //"running total"
     double _best_tot; //upper bound. best so far.
     //maybe: add overly-optimistic lower bound. MST (but forego safe/wild cats)
 
     std::vector<Vertex> _vertices;
     std::vector<primsTable> _primsTable;
     std::vector<uint32_t> _fast_path;
-    std::vector<uint32_t> _opt_path;
+    std::vector<uint32_t> _cur_path;
     std::vector<uint32_t> _best_path; //best so far.
     
 public:

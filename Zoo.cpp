@@ -9,7 +9,7 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	_arbitrary_root_id = 0;
 	_mst_tot_dist = 0;
 	_fast_tot = 0;
-	_opt_tot = 0;
+	_cur_tot = 0;
 	_best_tot = 0;
 
     int opt;
@@ -83,23 +83,20 @@ void Zoo::runFASTTSP() {
 
 //=======WIP ZONE START==================================
 void Zoo::runOPTTSP() {
-	//TODO: IMPLEMENT (Part C)
-	/*checklist:
-	[] always start/end at cage 0	
-
+	/*
 	Paoletti vid:
-		[x] path must start at 0.
-		[x] very first genPerms call must be 1.
+		[] always start/end at cage 0	
 	*/
 	randInsTSP(); //gen lower bound
-	_best_tot = _fast_tot;
-	/*
-	_opt_path.reserve(_num_vertices + 1);
-	_opt_path.push_back(0); //init opt path (start node 0)
-	*/
-	_opt_path = _fast_path; //init to Part B path. 
+	_best_tot = _fast_tot; //init to Part B total.
+	_best_path = _fast_path; //init to Part B path. 
+	_cur_path = _best_path; //init to Part B path.
 
-	genPerms(1); //TODO: Place somewhere. For (v-1)! vs. (v)!.
+	genPerms(1);
+
+
+
+
 	branchBoundTSP();
 }
 
@@ -122,61 +119,34 @@ void Zoo::branchBoundTSP() {
 }
 
 void Zoo::genPerms(uint32_t pLen) {
-	//TODO: Finish.
-/*checklist:
-	[] make sure updating properly in each case:
-		[] lengths (tot dist)
-		[] paths
-*/
-  if (!promising(pLen)) { return; }
+//Note:
+//	- Return means go back (backtrack to parent). Otherwise, keep going DFS (for loop)
+//	- NOT tail-recursive.
+	if (pLen == _cur_path.size()) { //base case
+		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[0]); //pre-cond: consider cycle-closing edge
 
-  if (pLen == _opt_path.size()) {
-  // Do something with the path
-  /*paoletti pseudocode:
-  */
- 	uint32_t i = _opt_path[pLen - 1]; //gets vert id (of prev)
- 	uint32_t j = _opt_path[pLen]; //get vert id (of cur)
-	_opt_tot += getAppendCost(i, j);
-	_best_tot = _opt_tot;
-	_opt_tot -= getAppendCost(i, j);
+		if (promising(pLen)) { 
+			_best_path = _cur_path;
+			_best_tot = _cur_tot;
+		}
 
-    return;
-  }
+		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[0]); //post-cond: remove cycle-closing edge
+		return;
+	}
 
-  for (uint32_t i = pLen; i < _opt_path.size(); ++i) {
-    std::swap(_opt_path[pLen], _opt_path[i]);
-    genPerms(pLen + 1);
-    std::swap(_opt_path[pLen], _opt_path[i]);
-  }
+	if (!promising(pLen)) { return; } //pruning
+
+	for (uint32_t i = pLen; i < _cur_path.size(); ++i) { //continue DFS
+		std::swap(_cur_path[pLen], _cur_path[i]);
+		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //pre-cond (trav. to children)
+		genPerms(pLen + 1);
+		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //post-cond (return to parent)
+		std::swap(_cur_path[pLen], _cur_path[i]);
+	}
 }
 
 bool Zoo::promising(uint32_t pLen) {
-	//TODO: Implement.
-	/*pseudo:
-	_opt_tot += last edge (edge to current node)
-
-	if (_opt_tot < 
-
-	if (full_tour_len > best_tour_len)	{
-		return false;
-	}
-	*/
-/*
-for every perm we check if it's promising 
-	- promising means potentially correct/optimal
-
-
-*/
- 	uint32_t i = _opt_path[pLen - 1]; //gets vert id (of prev)
- 	uint32_t j = _opt_path[pLen]; //get vert id (of cur)
-	_opt_tot += getAppendCost(i, j);
-
-	if (_opt_tot > _best_tot) {
-		_opt_tot -= getAppendCost(i, j);
-		return false;
-	}
-
-	_opt_tot -= getAppendCost(i, j);
+	if (_cur_tot >= _best_tot) { return false; }
 	return true;
 }
 //=======WIP ZONE END====================================
@@ -232,6 +202,7 @@ void Zoo::printFastTSP() {
 	std::cout << "\n";
 }
 
+//gets cost (could be pos. or neg.) of inserting k between i and j ({i, k, j} = Vertex id's).  
 double Zoo::getInsCost(uint32_t i, uint32_t k, uint32_t j) {
 	Vertex v1 = _vertices[i];
 	Vertex v2 = _vertices[k];
@@ -241,6 +212,7 @@ double Zoo::getInsCost(uint32_t i, uint32_t k, uint32_t j) {
 	return cost;
 }
 
+//gets cost (always positive) of adding an edge, given two Vertex id's. 
 double Zoo::getAppendCost(uint32_t i, uint32_t j) {
 	Vertex v1 = _vertices[i];
 	Vertex v2 = _vertices[j];
