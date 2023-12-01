@@ -8,7 +8,9 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	_num_vertices = 0;
 	_arbitrary_root_id = 0;
 	_mst_tot_dist = 0;
-	_fast_tot_dist = 0;
+	_fast_tot = 0;
+	_opt_tot = 0;
+	_best_tot = 0;
 
     int opt;
 	int opt_idx;
@@ -79,9 +81,105 @@ void Zoo::runFASTTSP() {
 	printFastTSP();	
 }
 
+//=======WIP ZONE START==================================
 void Zoo::runOPTTSP() {
 	//TODO: IMPLEMENT (Part C)
+	/*checklist:
+	[] always start/end at cage 0	
+
+	Paoletti vid:
+		[x] path must start at 0.
+		[x] very first genPerms call must be 1.
+	*/
+	randInsTSP(); //gen lower bound
+	_best_tot = _fast_tot;
+	/*
+	_opt_path.reserve(_num_vertices + 1);
+	_opt_path.push_back(0); //init opt path (start node 0)
+	*/
+	_opt_path = _fast_path; //init to Part B path. 
+
+	genPerms(1); //TODO: Place somewhere. For (v-1)! vs. (v)!.
+	branchBoundTSP();
 }
+
+void Zoo::branchBoundTSP() {
+	//TODO: Finish.
+	/*pseudocode (per lab10 pdf)
+
+	checknode (node v, best)
+		if (!is_promising(v)):
+			return
+		if (is_solution(v)):
+			update(best)
+			return
+		for (each child u of v):
+			checknode(u, best)
+
+	*/
+
+		
+}
+
+void Zoo::genPerms(uint32_t pLen) {
+	//TODO: Finish.
+/*checklist:
+	[] make sure updating properly in each case:
+		[] lengths (tot dist)
+		[] paths
+*/
+  if (!promising(pLen)) { return; }
+
+  if (pLen == _opt_path.size()) {
+  // Do something with the path
+  /*paoletti pseudocode:
+  */
+ 	uint32_t i = _opt_path[pLen - 1]; //gets vert id (of prev)
+ 	uint32_t j = _opt_path[pLen]; //get vert id (of cur)
+	_opt_tot += getAppendCost(i, j);
+	_best_tot = _opt_tot;
+	_opt_tot -= getAppendCost(i, j);
+
+    return;
+  }
+
+  for (uint32_t i = pLen; i < _opt_path.size(); ++i) {
+    std::swap(_opt_path[pLen], _opt_path[i]);
+    genPerms(pLen + 1);
+    std::swap(_opt_path[pLen], _opt_path[i]);
+  }
+}
+
+bool Zoo::promising(uint32_t pLen) {
+	//TODO: Implement.
+	/*pseudo:
+	_opt_tot += last edge (edge to current node)
+
+	if (_opt_tot < 
+
+	if (full_tour_len > best_tour_len)	{
+		return false;
+	}
+	*/
+/*
+for every perm we check if it's promising 
+	- promising means potentially correct/optimal
+
+
+*/
+ 	uint32_t i = _opt_path[pLen - 1]; //gets vert id (of prev)
+ 	uint32_t j = _opt_path[pLen]; //get vert id (of cur)
+	_opt_tot += getAppendCost(i, j);
+
+	if (_opt_tot > _best_tot) {
+		_opt_tot -= getAppendCost(i, j);
+		return false;
+	}
+
+	_opt_tot -= getAppendCost(i, j);
+	return true;
+}
+//=======WIP ZONE END====================================
 
 void Zoo::randInsTSP() {
 	/*
@@ -94,19 +192,19 @@ void Zoo::randInsTSP() {
 			[x] init path as {0, 0}
 				("bc then, however u pick the nxt one, u have a plc to insrt it")
 	*/
-	_fast_tsp_path.reserve(_num_vertices + 1);	
-	_fast_tsp_path.push_back(0); //root id (start)
-	_fast_tsp_path.push_back(0); //root id (end)
+	_fast_path.reserve(_num_vertices + 1);	
+	_fast_path.push_back(0); //root id (start)
+	_fast_path.push_back(0); //root id (end)
 
 	for (uint32_t k = 1; k < _num_vertices; ++k) { //rand vert id
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t ins_idx = UINT32_MAX;
 
-		for (uint32_t i_idx = 0; i_idx < _fast_tsp_path.size() - 1; ++i_idx) {
+		for (uint32_t i_idx = 0; i_idx < _fast_path.size() - 1; ++i_idx) {
 			uint32_t j_idx = i_idx + 1;
-			uint32_t i = _fast_tsp_path[i_idx]; //idx -> id
-			uint32_t j = _fast_tsp_path[j_idx]; //idx -> id
-			double cost = getCost(i, k, j);
+			uint32_t i = _fast_path[i_idx]; //idx -> id
+			uint32_t j = _fast_path[j_idx]; //idx -> id
+			double cost = getInsCost(i, k, j);
 
 			if (cost < minDist) {
 				minDist = cost;
@@ -114,13 +212,12 @@ void Zoo::randInsTSP() {
 			}
 		}
 
-		_fast_tot_dist += minDist;	
-		_fast_tsp_path.insert(_fast_tsp_path.begin() + ins_idx, k);
+		_fast_tot += minDist;	
+		_fast_path.insert(_fast_path.begin() + ins_idx, k);
 	}
 }
 
 void Zoo::printFastTSP() {
-	//TODO: Finish
 	/*pseudo:
 		[x] print total dist
 		[x] print path
@@ -128,20 +225,28 @@ void Zoo::printFastTSP() {
 	P says:
 		[x] pop 0 off before printing
 	*/
-	_fast_tsp_path.pop_back(); //removes trailing 0
+	_fast_path.pop_back(); //removes trailing 0
 
-	std::cout << _fast_tot_dist << "\n";
-	for (uint32_t id : _fast_tsp_path) { std::cout << id << " "; }
+	std::cout << _fast_tot << "\n";
+	for (uint32_t id : _fast_path) { std::cout << id << " "; }
 	std::cout << "\n";
 }
 
-double Zoo::getCost(uint32_t i, uint32_t k, uint32_t j) {
+double Zoo::getInsCost(uint32_t i, uint32_t k, uint32_t j) {
 	Vertex v1 = _vertices[i];
 	Vertex v2 = _vertices[k];
 	Vertex v3 = _vertices[j];
-	double c = getDistance(v1, v2) + getDistance(v2, v3) - getDistance(v1, v3);
+	double cost = getDistance(v1, v2) + getDistance(v2, v3) - getDistance(v1, v3);
 
-	return c;
+	return cost;
+}
+
+double Zoo::getAppendCost(uint32_t i, uint32_t j) {
+	Vertex v1 = _vertices[i];
+	Vertex v2 = _vertices[j];
+	double cost = getDistance(v1, v2);
+
+	return cost;
 }
 
 double Zoo::getDistance(Vertex v1, Vertex v2) {
