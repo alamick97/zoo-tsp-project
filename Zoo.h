@@ -98,14 +98,9 @@ public:
     Category getCategory(int x, int y); //calculates & determines category
     void initPrimsTable(); //inits via root id
     void printMST();
-    void primsLinear();
+    void primsLinear(bool considerCat);
     void randInsTSP();
     void printTSP(Mode tsp);
-    //void printFastTSP();
-    //void printOptTSP();
-    //void christofidesAlg(); //run Christofide's Algorithm
-    //std::unordered_set<uint32_t> getOddVertices(); //count # of odd degree vertices
-    //std::vector<Edge> findMWPM(std::unordered_set<uint32_t> odd_vertices); //Minimum-Weight Perfect Matching (christofides step 2)
     
     void readInput(); //reads input redirection via cin. 
     void runSpecifiedMode();
