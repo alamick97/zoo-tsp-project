@@ -101,7 +101,6 @@ void Zoo::genPerms(uint32_t pLen) {
 	if (pLen == _cur_path.size()) { //base case, for (n-1) Complete Paths
 		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[0]); //pre-cond: consider cycle-closing edge
 
-		//if (promising(false)) {  //updates best-so-far if better
 		if (promising(pLen)) {  //updates best-so-far if better
 			_best_path = _cur_path;
 			_best_tot = _cur_tot;
@@ -111,8 +110,6 @@ void Zoo::genPerms(uint32_t pLen) {
 		return;
 	}
 
-	//if (!promising(pLen)) { return; } //pruning
-	//if (!promising(true)) { return; } //pruning
 	if (!promising(pLen)) { return; } //pruning
 
 	for (uint32_t i = pLen; i < _cur_path.size(); ++i) { //continue DFS
