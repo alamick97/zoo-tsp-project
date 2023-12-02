@@ -81,10 +81,9 @@ class Zoo {
     double _fast_tot;
     double _cur_tot; //"running total"
     double _best_tot; //upper bound. best so far.
-    //maybe: add overly-optimistic lower bound. MST (but forego safe/wild cats)
 
     std::vector<Vertex> _vertices;
-    std::vector<primsTable> _primsTable;
+    std::vector<primsTable> _table; //prims table
     std::vector<uint32_t> _fast_path; //completed path includes trailing 0.
     std::vector<uint32_t> _cur_path;
     std::vector<uint32_t> _best_path; //best COMPLETE path so far. 
@@ -97,11 +96,8 @@ public:
     double getAppendCost(uint32_t i, uint32_t j);
     Category getCategory(int x, int y); //calculates & determines category
     void printMST();
-    //void initPrimsTable(); //inits via root id
-    //void primsLinear(bool considerCat);
     void primsLinearPartA();
     double primsLinearPartC(uint32_t pLen);
-    //double primsLinearPartC(const std::vector<uint32_t>& rem_path, uint32_t num_rem);
     double getLowerBound(uint32_t pLen); //lowerbound = cur_path + underestimate_of_remaining(mst)
     void randInsTSP();
     void printTSP(Mode tsp);
@@ -115,8 +111,6 @@ public:
     //part C
     void genPerms(uint32_t pLen); //i think uint32_t is sufficient (not size_t). waiting for piazza answer. 
     bool promising(uint32_t pLen);
-    //bool promising(bool isPartial);
-    //void branchBoundTSP();
 };
 
 #endif //ZOO_H
