@@ -98,7 +98,8 @@ void Zoo::runOPTTSP() {
 
 //function: updates _best_path & _best_tot
 void Zoo::genPerms(uint32_t pLen) {
-std::cout << "pLen: " << pLen << "\n";
+//std::cout << "cur tot: " << _cur_tot << "\n";
+//std::cout << "upperbound: " << _best_tot << "\n";
 
 	if (pLen == _cur_path.size()) { //base case, for (n-1) Complete Paths
 		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[0]); //pre-cond: consider cycle-closing edge
@@ -127,7 +128,6 @@ std::cout << "pLen: " << pLen << "\n";
 bool Zoo::promising(uint32_t pLen) {
 	//first check lower bound (mst) approx. of remaining path
 	double lowerbound = getLowerBound(pLen);
-std::cout << "debugger stoppoint 4" << "\n";
 	if (lowerbound >= _best_tot) { return false; } //if lowerbound >= upperbound
 
 	//then check upper bound (best-so-far)
@@ -156,11 +156,12 @@ double Zoo::getLowerBound(uint32_t pLen) {
 		//idea: include it in my set of vertices to find MST for.
 
 	double rem_tot = primsLinearPartC(pLen);//calc MST len for remaining path
+//std::cout << "rem tot: " << rem_tot << "\n"; //TODO: DEBUG. ALWAYS RETURNS ZERO BUT SHOULD NOT!!!
 	double lowerbound = _cur_tot + rem_tot;
+//std::cout << "lowerbound: " << lowerbound << "\n";
 	return lowerbound;
 }
 
-//Note: DON'T WORRY about connecting to first/last node. That's done in getLowerBound(). 
 //Goal: Return remaining total (approx by MST).
 	//so, have MST find this remaining total.
 double Zoo::primsLinearPartC(uint32_t pLen) {
@@ -168,7 +169,7 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 	_cur_path.push_back(_cur_path[pLen]); //PRE-CONDITION: End of cycle (last node)
 
 	double total = 0;
-	uint32_t _cur_root =  _cur_path[pLen]; //current root id for remaining
+	uint32_t _cur_root = _cur_path[pLen]; //current root id for remaining
 	_table.clear(); //reset prim table
 	_table.resize(_num_vertices);
 	_table[_cur_root].dv = 0;
@@ -183,6 +184,7 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 			primsTable row = _table[id];//get row in prim table
 			if (row.kv == false) {
 				if (row.dv < minDist) {
+std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
 					minDist = row.dv;
 					id_min = id;
 				}
@@ -194,17 +196,11 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 
 		//update all dv,pv connected to id_min
 		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) {
-//==========DEBUGGING ZONE START==========================================
 			uint32_t id = _cur_path[idx];//get id from idx
-//std::cout << "id: " << id << "\n";
-//std::cout << "table size: " << _table.size() << "\n";
-//std::cout << "debugger stoppoint 4.1" << "\n";
 			primsTable row = _table[id];
-//std::cout << "debugger stoppoint 4.2" << "\n";
 			if (row.kv == false) {
 				Vertex v1 = _vertices[id_min];
 				Vertex v2 = _vertices[id];	
-//==========DEBUGGING ZONE END============================================
 
 				double oldDist = row.dv;
 				double newDist = getDistance(v1, v2);
