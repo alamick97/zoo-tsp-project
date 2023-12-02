@@ -72,7 +72,7 @@ void Zoo::runSpecifiedMode() {
 }
 
 void Zoo::runMST() {
-	primsLinear(true); //consider cage category
+	primsLinearPartA(); //consider cage category
 	printMST();
 } 
 
@@ -83,18 +83,135 @@ void Zoo::runFASTTSP() {
 }
 
 void Zoo::runOPTTSP() {
-	primsLinear(false);//TODO: Determine if needed. (for lower(?) bound)
-	randInsTSP(); //gen upper(?) bound
+	randInsTSP(); //gen initial upper bound (part B total).
+	_fast_path.pop_back(); //removes trailing 0 from Part B path.
 
-	_fast_path.pop_back(); //removes trailing 0-root
 	_best_tot = _fast_tot; //init to Part B total.
 	_cur_tot = 0; //safeguard init
-	_best_path = _fast_path; //init to Part B path. 
+	_best_path = _fast_path; //init to Part B path.
 	_cur_path = _best_path; //init to Part B path.
 
 	genPerms(1); //updates _best_path & _best_tot to approp. vals.
 
 	printTSP(Mode::OPTTSP);
+}
+
+//function: updates _best_path & _best_tot
+void Zoo::genPerms(uint32_t pLen) {
+	if (pLen == _cur_path.size()) { //base case, for (n-1) Complete Paths
+		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[0]); //pre-cond: consider cycle-closing edge
+
+		if (promising(false)) {  //updates best-so-far if better
+			_best_path = _cur_path;
+			_best_tot = _cur_tot;
+		}
+
+		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[0]); //post-cond: remove cycle-closing edge
+		return;
+	}
+
+	//if (!promising(pLen)) { return; } //pruning
+	if (!promising(true)) { return; } //pruning
+
+	for (uint32_t i = pLen; i < _cur_path.size(); ++i) { //continue DFS
+		std::swap(_cur_path[pLen], _cur_path[i]);
+		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //pre-cond (trav. to children)
+		genPerms(pLen + 1);
+		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //post-cond (return to parent)
+		std::swap(_cur_path[pLen], _cur_path[i]);
+	}
+}
+
+//bool Zoo::promising(uint32_t pLen) {
+bool Zoo::promising(bool isPartial) {
+	//first check lower bound (mst)
+	if (isPartial) {
+		double lowerbound = getLowerBound();
+		if (lowerbound >= _best_tot) { return false; }
+	}
+
+	//then check upper bound (best-so-far)
+	if (_cur_tot >= _best_tot) { return false; }
+
+	return true;
+}
+
+double Zoo::getLowerBound() {
+	//lowerbound = cur_path_len + MST_of_remaining = estimate of totality of current path
+	//lowerbound estimates (beyond the) best case scenario for what can result if we continue down the current path.
+		//thus, if our partial solution total 
+	/*plan: Use _best_path & _cur_path to get _rem_path. 
+	*/
+	uint32_t first = _cur_path[0];
+	uint32_t last = _cur_path[_cur_path.size() - 1];
+
+	std::vector<uint32_t> rem_path; //remaining path = _best_path (complete) - _cur_path (usually partial)
+	uint32_t num_rem = _num_vertices - _cur_path.size();
+	rem_path.reserve(num_rem);
+	
+	//build vector of remaining vertex IDs (+ first & last of visited)
+	for (const uint32_t& visited : _cur_path) {
+		for (const uint32_t& unvisited: _best_path) {
+			if (visited != unvisited || first == unvisited || last == unvisited) { 
+				rem_path.push_back(unvisited); 
+			}
+		}
+	}
+
+	//calc MST len for remaining path
+	double rem_tot = primsLinearPartC(rem_path, num_rem);
+	//still need to "connect visited vertices to the unvisited". so visited[0] and visited[last]
+
+	double lowerbound = _cur_tot + rem_tot;
+
+	return lowerbound;
+}
+
+//TODO: Implement for part C. Takes in a pointer to a vector of vertices, to find MST underestimate cost of remaining path. 
+double Zoo::primsLinearPartC(const std::vector<uint32_t>& rem_path, uint32_t num_rem) {
+	//idea: O(V^2): Identify unvisited nodes:
+		//Double for-loop for current vector path & 
+	double rem_tot = 0;
+	std::vector<primsTable> primsTable;
+	primsTable.resize(num_rem);
+	primsTable[0].dv = 0;
+
+	for (uint32_t i = 0; i < num_rem; ++i) {
+		double minDist = std::numeric_limits<double>::infinity();
+		uint32_t id_min = 0; //AG warning forced me to init to val.
+
+		//get shortest dist (find id_min)
+		for (uint32_t i = 0; i < num_rem; i++) {
+			if (primsTable[i].kv == false) {
+				if (primsTable[i].dv < minDist) {
+					minDist = primsTable[i].dv;
+					id_min = i;
+				}
+			}
+		}
+
+		//update kv (for id_min)
+		primsTable[id_min].kv = true;
+
+		//update total dist
+		rem_tot += primsTable[id_min].dv;
+
+		Vertex v1 = _vertices[id_min];
+		//update dv,pv (for id_min)
+		for (uint32_t i = 0; i < num_rem; i++) {
+			if (primsTable[i].kv == false) {
+				Vertex v2 = _vertices[i];
+				double oldDist = primsTable[i].dv;
+				double newDist = getDistance(v1, v2);
+				if (newDist < oldDist) { 
+					primsTable[i].dv = newDist; 
+					primsTable[i].pv = id_min;
+				}
+			}
+		}
+	}
+
+	return rem_tot;
 }
 
 void Zoo::printTSP(Mode tsp) {
@@ -119,43 +236,6 @@ void Zoo::printTSP(Mode tsp) {
 	}
 }
 
-//function: updates _best_path & _best_tot
-void Zoo::genPerms(uint32_t pLen) {
-//Note:
-//	- Return means go back (backtrack to parent). Otherwise, keep going DFS (for loop)
-//	- NOT tail-recursive.
-//	- Once genPerms is done, _cur_path & _cur_tot are meaningless and near or at empty/0.
-//		- This is why we update _best_path & _best_tot in the base case, to be used later.
-	if (pLen == _cur_path.size()) { //base case
-		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[0]); //pre-cond: consider cycle-closing edge
-
-		//if (promising(pLen)) { 
-		if (promising()) { 
-			_best_path = _cur_path;
-			_best_tot = _cur_tot;
-		}
-
-		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[0]); //post-cond: remove cycle-closing edge
-		return;
-	}
-
-	//if (!promising(pLen)) { return; } //pruning
-	if (!promising()) { return; } //pruning
-
-	for (uint32_t i = pLen; i < _cur_path.size(); ++i) { //continue DFS
-		std::swap(_cur_path[pLen], _cur_path[i]);
-		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //pre-cond (trav. to children)
-		genPerms(pLen + 1);
-		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //post-cond (return to parent)
-		std::swap(_cur_path[pLen], _cur_path[i]);
-	}
-}
-
-//bool Zoo::promising(uint32_t pLen) {
-bool Zoo::promising() {
-	if (_cur_tot >= _best_tot) { return false; }
-	return true;
-}
 
 void Zoo::randInsTSP() {
 	/*
@@ -244,6 +324,51 @@ void Zoo::printMST() {
 	}
 }
 
+void Zoo::primsLinearPartA() {
+	_primsTable.resize(_num_vertices);
+	_primsTable[_arbitrary_root_id].dv = 0;
+
+	for (uint32_t i = 0; i < _num_vertices; ++i) {
+		double minDist = std::numeric_limits<double>::infinity();
+		uint32_t id_min = _arbitrary_root_id; //AG warning forced me to init to val.
+
+		//get shortest dist (find id_min)
+		for (uint32_t i = 0; i < _num_vertices; i++) {
+			if (_primsTable[i].kv == false) {
+				if (_primsTable[i].dv < minDist) {
+					minDist = _primsTable[i].dv;
+					id_min = i;
+				}
+			}
+		}
+
+		//update kv (for id_min)
+		_primsTable[id_min].kv = true;
+
+		//update total dist
+		_mst_tot_dist += _primsTable[id_min].dv;
+
+		Vertex v1 = _vertices[id_min];
+		//update dv,pv (for id_min)
+		for (uint32_t i = 0; i < _num_vertices; i++) {
+			if (_primsTable[i].kv == false) {
+				Vertex v2 = _vertices[i];
+				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
+					  (v1.cat == Category::Wild && v2.cat == Category::Safe))) {
+						double oldDist = _primsTable[i].dv;
+						double newDist = getDistance(v1, v2);
+						if (newDist < oldDist) { 
+							_primsTable[i].dv = newDist; 
+							_primsTable[i].pv = id_min;
+						}
+				}
+			}
+		}
+	}
+}
+
+
+/*
 void Zoo::primsLinear(bool considerCat) {
 	initPrimsTable();
 
@@ -291,3 +416,4 @@ void Zoo::initPrimsTable() {
 	_primsTable.resize(_num_vertices);
 	_primsTable[_arbitrary_root_id].dv = 0;
 }
+*/

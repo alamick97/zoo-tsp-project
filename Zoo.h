@@ -85,9 +85,9 @@ class Zoo {
 
     std::vector<Vertex> _vertices;
     std::vector<primsTable> _primsTable;
-    std::vector<uint32_t> _fast_path;
+    std::vector<uint32_t> _fast_path; //completed path includes trailing 0.
     std::vector<uint32_t> _cur_path;
-    std::vector<uint32_t> _best_path; //best so far.
+    std::vector<uint32_t> _best_path; //best COMPLETE path so far. 
     
 public:
     Zoo(int argc, char** argv);
@@ -96,9 +96,12 @@ public:
     double getInsCost(uint32_t i, uint32_t k, uint32_t j); //{i, k, j} = vertex IDs
     double getAppendCost(uint32_t i, uint32_t j);
     Category getCategory(int x, int y); //calculates & determines category
-    void initPrimsTable(); //inits via root id
     void printMST();
-    void primsLinear(bool considerCat);
+    //void initPrimsTable(); //inits via root id
+    //void primsLinear(bool considerCat);
+    void primsLinearPartA();
+    double primsLinearPartC(const std::vector<uint32_t>& rem_path, uint32_t num_rem);
+    double getLowerBound(); //lowerbound = cur_path + underestimate_of_remaining(mst)
     void randInsTSP();
     void printTSP(Mode tsp);
     
@@ -110,9 +113,8 @@ public:
 
     //part C
     void genPerms(uint32_t pLen); //i think uint32_t is sufficient (not size_t). waiting for piazza answer. 
-    //bool promising(uint32_t pLen);
-    bool promising();
-    void branchBoundTSP();
+    bool promising(bool isPartial);
+    //void branchBoundTSP();
 };
 
 #endif //ZOO_H
