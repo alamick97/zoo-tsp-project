@@ -100,8 +100,9 @@ public:
     //void initPrimsTable(); //inits via root id
     //void primsLinear(bool considerCat);
     void primsLinearPartA();
-    double primsLinearPartC(const std::vector<uint32_t>& rem_path, uint32_t num_rem);
-    double getLowerBound(); //lowerbound = cur_path + underestimate_of_remaining(mst)
+    double primsLinearPartC(uint32_t pLen);
+    //double primsLinearPartC(const std::vector<uint32_t>& rem_path, uint32_t num_rem);
+    double getLowerBound(uint32_t pLen); //lowerbound = cur_path + underestimate_of_remaining(mst)
     void randInsTSP();
     void printTSP(Mode tsp);
     
@@ -113,7 +114,8 @@ public:
 
     //part C
     void genPerms(uint32_t pLen); //i think uint32_t is sufficient (not size_t). waiting for piazza answer. 
-    bool promising(bool isPartial);
+    bool promising(uint32_t pLen);
+    //bool promising(bool isPartial);
     //void branchBoundTSP();
 };
 
