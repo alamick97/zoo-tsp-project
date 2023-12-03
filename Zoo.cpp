@@ -145,6 +145,20 @@ bool Zoo::promising(uint32_t pLen) {
 		[] lowerbound = armCost1 + armCost2 + remainingMST	
 	*/
 
+//	[] check connecting arm 1
+//		[] get armCost1
+//		[] if (_tot + armCost1 >= _best_tot) { return false; }
+//	[] check connecting arm 2
+//		[] get armCost2
+//		[] if (_tot + armCost2 >= _best_tot) { return false; }
+//	[] check est. of remaining
+//		[] get MST of remaining ONLY
+//		[] lowerbound = armCost1 + armCost2 + remainingMST	
+
+
+
+
+
 
  /*pretty much wrong:
 	double lowerbound = getLowerBound(pLen);
