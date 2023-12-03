@@ -9,7 +9,7 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 	_arbitrary_root_id = 0;
 	_mst_tot_dist = 0;
 	_fast_tot = 0;
-	_cur_tot = 0;
+	_tot = 0;
 	_best_tot = 0;
 
     int opt;
@@ -86,12 +86,13 @@ void Zoo::runOPTTSP() {
 	randInsTSP(); //gen initial upper bound (part B total).
 	_fast_path.pop_back(); //removes trailing 0 from Part B path.
 
-	_best_tot = _fast_tot; //init to Part B total.
-	_cur_tot = 0; //safeguard init
-	_best_path = _fast_path; //init to Part B path.
-	_cur_path = _best_path; //init to Part B path.
-	_cur_path.reserve(_cur_path.size() + 2); //for connecting arms for upperbound est.
 
+	_best_tot = _fast_tot; //init to Part B total.
+	_tot = 0; //safeguard init
+	_best_path = _fast_path; //init to Part B path.
+	_path = _best_path;
+
+//=========GOOD UP TO HERE #1==========================================================
 	genPerms(1); //updates _best_path & _best_tot to approp. vals.
 
 	printTSP(Mode::OPTTSP);
@@ -99,110 +100,91 @@ void Zoo::runOPTTSP() {
 
 //function: updates _best_path & _best_tot
 void Zoo::genPerms(uint32_t pLen) {
-//std::cout << "cur tot: " << _cur_tot << "\n";
-//std::cout << "upperbound: " << _best_tot << "\n";
+	if (pLen == _path.size()) { //base case, for (n-1) Complete Paths
+		_tot += getAppendCost(_path.size(), _path[0]); //pre-cond: consider cycle-closing edge
 
-	if (pLen == _cur_path.size()) { //base case, for (n-1) Complete Paths
-		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[0]); //pre-cond: consider cycle-closing edge
-
-		if (promising(pLen)) {  //updates best-so-far if better
-			_best_path = _cur_path;
-			_best_tot = _cur_tot;
+		if (_tot < _best_tot) {  //updates best-so-far if better
+			_best_path = _path;
+			_best_tot = _tot;
 		}
 
-		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[0]); //post-cond: remove cycle-closing edge
+		_tot -= getAppendCost(_path[pLen], _path[0]); //post-cond: remove cycle-closing edge
+
 		return;
 	}
 
+//=========GOOD UP TO HERE #2==========================================================
 	if (!promising(pLen)) { return; } //pruning
 
-	for (uint32_t i = pLen; i < _cur_path.size(); ++i) { //continue DFS
-		std::swap(_cur_path[pLen], _cur_path[i]);
-		_cur_tot += getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //pre-cond (trav. to children)
+	for (uint32_t i = pLen; i < _path.size(); ++i) { //continue DFS
+		std::swap(_path[pLen], _path[i]);
+		_tot += getAppendCost(_path[pLen], _path[pLen + 1]); //pre-cond (trav. to children)
 		genPerms(pLen + 1);
-		_cur_tot -= getAppendCost(_cur_path[pLen], _cur_path[pLen + 1]); //post-cond (return to parent)
-		std::swap(_cur_path[pLen], _cur_path[i]);
+		_tot -= getAppendCost(_path[pLen], _path[pLen + 1]); //post-cond (return to parent)
+		std::swap(_path[pLen], _path[i]);
 	}
 }
 
-//pLen should always be >= 1
+//Note: pLen is always >= 1
 bool Zoo::promising(uint32_t pLen) {
-	//first check lower bound (mst) approx. of remaining path
-	if (pLen != _cur_path.size()) {
-		double lowerbound = getLowerBound(pLen);
-		if (lowerbound >= _best_tot) { return false; } //if lowerbound >= upperbound
-	}
+	uint32_t k = _path.size() - pLen;
 
-	//then check upper bound (best-so-far)
-	if (_cur_tot >= _best_tot) { return false; }
+	if (k <= 4) { return true; } //efficiency guard.
 
+	//lower bound check
+//=========GOOD UP TO HERE #3==========================================================
+	/*pseudo:
+	[] check connecting arm 1
+		[] get armCost1
+		[] if (_tot + armCost1 >= _best_tot) { return false; }
+	[] check connecting arm 2
+		[] get armCost2
+		[] if (_tot + armCost2 >= _best_tot) { return false; }
+	[] check est. of remaining
+		[] get MST of remaining ONLY
+		[] lowerbound = armCost1 + armCost2 + remainingMST	
+	*/
+
+
+ /*pretty much wrong:
+	double lowerbound = getLowerBound(pLen);
+	if (lowerbound >= _best_tot) { return false; } //if lowerbound >= upperbound
+*/
+
+/*may be unneeded:
+	//upper bound check
+	if (_tot >= _best_tot) { return false; }
+*/
 	return true;
 }
 
-//pLen should always be >= 1
+//Note: pLen is always >= 1
 double Zoo::getLowerBound(uint32_t pLen) {
-	/*
-	std::vector<uint32_t> rem_path; //remaining path = _best_path (complete) - _cur_path (usually partial)
-
-	//build vector of remaining vertex IDs (+ first & last of visited)
-	//rem_path.reserve(_num_vertices - pLen + 2);//+2 is for connecting to 1st & last cur_path nodes
-	rem_path.resize(_num_vertices - pLen + 2);//+2 is for connecting to 1st & last cur_path nodes
-	for (uint32_t i = pLen; i < _num_vertices; ++i) {
-		rem_path[i] = _cur_path[i];
-	}
-
-	rem_path.push_back(_cur_path[0]);
-	rem_path.push_back(_cur_path[pLen - 1]);
-	*/
-
-	//TODO: Figure out how to add the cost of cur[0] & cur[pLen]
-		//idea: include it in my set of vertices to find MST for.
-
 	double rem_tot = primsLinearPartC(pLen);//calc MST len for remaining path
-//std::cout << "rem tot: " << rem_tot << "\n"; //TODO: DEBUG. ALWAYS RETURNS ZERO BUT SHOULD NOT!!!
-	double lowerbound = _cur_tot + rem_tot;
-//std::cout << "lowerbound: " << lowerbound << "\n";
+	double lowerbound = _tot + rem_tot;
 	return lowerbound;
 }
 
-//Goal: Return remaining total (approx by MST).
-	//so, have MST find this remaining total.
 double Zoo::primsLinearPartC(uint32_t pLen) {
-//======================DEBUGGER START======================================================================
-/*
-std::cout << "_cur_path: ";
-for (const uint32_t& node : _cur_path) {
-	std::cout << node << " ";
-}
-std::cout << " | pLen: " << pLen << "\n";
-*/
-//======================DEBUGGER END========================================================================
-
-	uint32_t first = _cur_path[0]; //connecting arm 1 (to root)
-	uint32_t last = _cur_path[pLen - 1]; //connecting arm 2 (to _cur_path[pLen - 1])
-	_cur_path.push_back(first); //PRE-CONDITION: Root node
-	if (first != last) { _cur_path.push_back(last); }//PRE-CONDITION: End of cycle (last node)
+	uint32_t first = _path[0]; //connecting arm 1 (to root)
+	uint32_t last = _path[pLen - 1]; //connecting arm 2 (to _path[pLen - 1])
+	_path.push_back(first); //PRE-CONDITION: Root node
+	if (first != last) { _path.push_back(last); }//PRE-CONDITION: End of cycle (last node)
 
 	double total = 0;
 	_table.clear();
 	_table.resize(_num_vertices);
-	uint32_t _cur_root = _cur_path[pLen];
+	uint32_t _cur_root = _path[pLen];
 	_table[_cur_root].dv = 0;
 
-	for (uint32_t i = pLen; i < _cur_path.size(); ++i) {
+	for (uint32_t i = pLen; i < _path.size(); ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id_min = _cur_root; //AG warning forced me to init to val.
 		
 		//find id of min dist
-		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) { //get rem idx's
-			uint32_t id = _cur_path[idx]; //get id from idx
+		for (uint32_t idx = pLen; idx < _path.size(); ++idx) { //get rem idx's
+			uint32_t id = _path[idx]; //get id from idx
 			primsTable& row = _table[id];//get row in prim table
-//======================DEBUGGER START======================================================================
-/*
-std::cout << "idx: " << idx << " | " << "id: " << id << " | " << "row.kv: " << row.kv;
-std::cout << " | row.dv: " << row.dv << " | row.pv: " << row.pv << "\n";
-*/
-//======================DEBUGGER END========================================================================
 			if (row.kv == false) {
 				if (row.dv < minDist) {
 					minDist = row.dv;
@@ -216,8 +198,8 @@ std::cout << " | row.dv: " << row.dv << " | row.pv: " << row.pv << "\n";
 		total += _table[id_min].dv;
 
 		//update all dv,pv connected to id_min
-		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) {
-			uint32_t id = _cur_path[idx];//get id from idx
+		for (uint32_t idx = pLen; idx < _path.size(); ++idx) {
+			uint32_t id = _path[idx];//get id from idx
 			primsTable& row = _table[id];
 			if (row.kv == false) {
 				Vertex v1 = _vertices[id_min];
@@ -225,12 +207,6 @@ std::cout << " | row.dv: " << row.dv << " | row.pv: " << row.pv << "\n";
 
 				double oldDist = row.dv;
 				double newDist = getDistance(v1, v2);
-//======================DEBUGGER START======================================================================
-/*
-std::cout << "oldDist: " << oldDist << "\n";
-std::cout << "newDist: " << newDist << "\n";
-*/
-//======================DEBUGGER END========================================================================
 				
 				if (newDist < oldDist) {
 					row.dv = newDist;
@@ -239,8 +215,8 @@ std::cout << "newDist: " << newDist << "\n";
 			}	
 		}
 	}
-	_cur_path.pop_back(); //POST-CONDITION: Root node
-	if (first != last) { _cur_path.pop_back(); }//POST-CONDITION: End of cycle (last node)
+	_path.pop_back(); //POST-CONDITION: Root node
+	if (first != last) { _path.pop_back(); }//POST-CONDITION: End of cycle (last node)
 
 	return total;
 }
