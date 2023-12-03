@@ -173,24 +173,30 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 	_table.clear(); //reset prim table
 	_table.resize(_num_vertices);
 	_table[_cur_root].dv = 0;
+	for (auto& row : _table) { 
+//		std::cout << "row.dv: " << row.dv << "\n";
+	}
 
 	for (uint32_t i = pLen; i < _cur_path.size(); ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id_min = _cur_root; //AG warning forced me to init to val.
+//std::cout << "id_min: " << id_min << "\n";
 		
 		//find id of min dist
 		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) { //get rem idx's
 			uint32_t id = _cur_path[idx]; //get id from idx
-			primsTable row = _table[id];//get row in prim table
+			primsTable& row = _table[id];//get row in prim table
+//std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
 			if (row.kv == false) {
 				if (row.dv < minDist) {
-std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
+//std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
 					minDist = row.dv;
 					id_min = id;
 				}
 			}
 		}
 
+		//update the minimum-dv row
 		_table[id_min].kv = true;
 		total += _table[id_min].dv;
 
@@ -204,6 +210,7 @@ std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
 
 				double oldDist = row.dv;
 				double newDist = getDistance(v1, v2);
+//std::cout << "newDist: " << newDist << "\n";
 				
 				if (newDist < oldDist) {
 					row.dv = newDist;
