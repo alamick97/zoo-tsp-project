@@ -90,6 +90,7 @@ void Zoo::runOPTTSP() {
 	_cur_tot = 0; //safeguard init
 	_best_path = _fast_path; //init to Part B path.
 	_cur_path = _best_path; //init to Part B path.
+	_cur_path.reserve(_cur_path.size() + 2); //for connecting arms for upperbound est.
 
 	genPerms(1); //updates _best_path & _best_tot to approp. vals.
 
@@ -127,8 +128,10 @@ void Zoo::genPerms(uint32_t pLen) {
 //pLen should always be >= 1
 bool Zoo::promising(uint32_t pLen) {
 	//first check lower bound (mst) approx. of remaining path
-	double lowerbound = getLowerBound(pLen);
-	if (lowerbound >= _best_tot) { return false; } //if lowerbound >= upperbound
+	if (pLen != _cur_path.size()) {
+		double lowerbound = getLowerBound(pLen);
+		if (lowerbound >= _best_tot) { return false; } //if lowerbound >= upperbound
+	}
 
 	//then check upper bound (best-so-far)
 	if (_cur_tot >= _best_tot) { return false; }
@@ -165,31 +168,35 @@ double Zoo::getLowerBound(uint32_t pLen) {
 //Goal: Return remaining total (approx by MST).
 	//so, have MST find this remaining total.
 double Zoo::primsLinearPartC(uint32_t pLen) {
-	_cur_path.push_back(_cur_path[0]); //PRE-CONDITION: Root node
-	_cur_path.push_back(_cur_path[pLen]); //PRE-CONDITION: End of cycle (last node)
+std::cout << "_cur_path: ";
+for (const uint32_t& node : _cur_path) {
+	std::cout << node << " ";
+}
+std::cout << " | pLen: " << pLen << "\n";
+
+	uint32_t first = _cur_path[0]; //connecting arm 1 (to root)
+	uint32_t last = _cur_path[pLen - 1]; //connecting arm 2 (to _cur_path[pLen - 1])
+	_cur_path.push_back(first); //PRE-CONDITION: Root node
+	if (first != last) { _cur_path.push_back(last); }//PRE-CONDITION: End of cycle (last node)
 
 	double total = 0;
-	uint32_t _cur_root = _cur_path[pLen]; //current root id for remaining
-	_table.clear(); //reset prim table
+	_table.clear();
 	_table.resize(_num_vertices);
+	uint32_t _cur_root = _cur_path[pLen];
 	_table[_cur_root].dv = 0;
-	for (auto& row : _table) { 
-//		std::cout << "row.dv: " << row.dv << "\n";
-	}
 
 	for (uint32_t i = pLen; i < _cur_path.size(); ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id_min = _cur_root; //AG warning forced me to init to val.
-//std::cout << "id_min: " << id_min << "\n";
 		
 		//find id of min dist
 		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) { //get rem idx's
 			uint32_t id = _cur_path[idx]; //get id from idx
 			primsTable& row = _table[id];//get row in prim table
-//std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
+std::cout << "idx: " << idx << " | " << "id: " << id << " | " << "row.kv: " << row.kv;
+std::cout << " | row.dv: " << row.dv << " | row.pv: " << row.pv << "\n";
 			if (row.kv == false) {
 				if (row.dv < minDist) {
-//std::cout << "id: " << id << " | " << "row.dv: " << row.dv << "\n";
 					minDist = row.dv;
 					id_min = id;
 				}
@@ -203,14 +210,15 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 		//update all dv,pv connected to id_min
 		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) {
 			uint32_t id = _cur_path[idx];//get id from idx
-			primsTable row = _table[id];
+			primsTable& row = _table[id];
 			if (row.kv == false) {
 				Vertex v1 = _vertices[id_min];
 				Vertex v2 = _vertices[id];	
 
 				double oldDist = row.dv;
 				double newDist = getDistance(v1, v2);
-//std::cout << "newDist: " << newDist << "\n";
+std::cout << "oldDist: " << oldDist << "\n";
+std::cout << "newDist: " << newDist << "\n";
 				
 				if (newDist < oldDist) {
 					row.dv = newDist;
@@ -220,7 +228,8 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 		}
 	}
 	_cur_path.pop_back(); //POST-CONDITION: Root node
-	_cur_path.pop_back(); //POST-CONDITION: End of cycle (last node)
+	if (first != last) { _cur_path.pop_back(); }//POST-CONDITION: End of cycle (last node)
+
 	return total;
 }
 
