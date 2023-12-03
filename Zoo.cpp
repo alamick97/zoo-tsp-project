@@ -168,11 +168,15 @@ double Zoo::getLowerBound(uint32_t pLen) {
 //Goal: Return remaining total (approx by MST).
 	//so, have MST find this remaining total.
 double Zoo::primsLinearPartC(uint32_t pLen) {
+//======================DEBUGGER START======================================================================
+/*
 std::cout << "_cur_path: ";
 for (const uint32_t& node : _cur_path) {
 	std::cout << node << " ";
 }
 std::cout << " | pLen: " << pLen << "\n";
+*/
+//======================DEBUGGER END========================================================================
 
 	uint32_t first = _cur_path[0]; //connecting arm 1 (to root)
 	uint32_t last = _cur_path[pLen - 1]; //connecting arm 2 (to _cur_path[pLen - 1])
@@ -193,8 +197,12 @@ std::cout << " | pLen: " << pLen << "\n";
 		for (uint32_t idx = pLen; idx < _cur_path.size(); ++idx) { //get rem idx's
 			uint32_t id = _cur_path[idx]; //get id from idx
 			primsTable& row = _table[id];//get row in prim table
+//======================DEBUGGER START======================================================================
+/*
 std::cout << "idx: " << idx << " | " << "id: " << id << " | " << "row.kv: " << row.kv;
 std::cout << " | row.dv: " << row.dv << " | row.pv: " << row.pv << "\n";
+*/
+//======================DEBUGGER END========================================================================
 			if (row.kv == false) {
 				if (row.dv < minDist) {
 					minDist = row.dv;
@@ -217,8 +225,12 @@ std::cout << " | row.dv: " << row.dv << " | row.pv: " << row.pv << "\n";
 
 				double oldDist = row.dv;
 				double newDist = getDistance(v1, v2);
+//======================DEBUGGER START======================================================================
+/*
 std::cout << "oldDist: " << oldDist << "\n";
 std::cout << "newDist: " << newDist << "\n";
+*/
+//======================DEBUGGER END========================================================================
 				
 				if (newDist < oldDist) {
 					row.dv = newDist;
