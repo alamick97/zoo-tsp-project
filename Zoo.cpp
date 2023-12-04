@@ -5,7 +5,7 @@
 Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
     _mode_flag = false;
 	_mode = Mode::Unspecified;
-	_num_vertices = 0;
+	_num_vert = 0;
 	_arbitrary_root_id = 0;
 	_mst_tot_dist = 0;
 	_fast_tot = 0;
@@ -51,13 +51,13 @@ Zoo::Zoo(int argc, char** argv) : _argc(argc), _argv(argv) {
 void Zoo::readInput() {
 	int x, y;
 
-	std::cin >> _num_vertices;
-	_vertices.reserve(_num_vertices);
+	std::cin >> _num_vert;
+	_vert.reserve(_num_vert);
 
-	for (uint32_t i = 0; i < _num_vertices; ++i) { //creates vector of vertices.
+	for (uint32_t i = 0; i < _num_vert; ++i) { //creates vector of vertices.
 		std::cin >> x >> y;
 		Category cat = getCategory(x, y);
-		_vertices.emplace_back(Vertex{x, y, cat}); //no need to store id. vector index is id.
+		_vert.emplace_back(Vertex{x, y, cat}); //no need to store id. vector index is id.
 	}
 }
 
@@ -101,14 +101,14 @@ void Zoo::runOPTTSP() {
 //function: updates _best_path & _best_tot
 void Zoo::genPerms(uint32_t pLen) {
 	if (pLen == _path.size()) { //base case, for (n-1) Complete Paths
-		_tot += getAppendCost(_path.size(), _path[0]); //pre-cond: consider cycle-closing edge
+		_tot += getAppendCost(_path[_path.size() - 1], _path[0]); //pre-cond: consider cycle-closing edge
 
 		if (_tot < _best_tot) {  //updates best-so-far if better
 			_best_path = _path;
 			_best_tot = _tot;
 		}
 
-		_tot -= getAppendCost(_path[pLen], _path[0]); //post-cond: remove cycle-closing edge
+		_tot -= getAppendCost(_path[_path.size() - 1], _path[0]); //post-cond: remove cycle-closing edge
 
 		return;
 	}
@@ -147,9 +147,11 @@ bool Zoo::promising(uint32_t pLen) {
 
 //	[] check connecting arm 1
 //		[] get armCost1
+	double arm1Cost = armCost(pLen, 0);
 //		[] if (_tot + armCost1 >= _best_tot) { return false; }
 //	[] check connecting arm 2
 //		[] get armCost2
+	double arm1Cost = armCost(pLen, pLen - 1);
 //		[] if (_tot + armCost2 >= _best_tot) { return false; }
 //	[] check est. of remaining
 //		[] get MST of remaining ONLY
@@ -187,7 +189,7 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 
 	double total = 0;
 	_table.clear();
-	_table.resize(_num_vertices);
+	_table.resize(_num_vert);
 	uint32_t _cur_root = _path[pLen];
 	_table[_cur_root].dv = 0;
 
@@ -216,11 +218,11 @@ double Zoo::primsLinearPartC(uint32_t pLen) {
 			uint32_t id = _path[idx];//get id from idx
 			primsTable& row = _table[id];
 			if (row.kv == false) {
-				Vertex v1 = _vertices[id_min];
-				Vertex v2 = _vertices[id];	
+				Vertex v1 = _vert[id_min];
+				Vertex v2 = _vert[id];	
 
 				double oldDist = row.dv;
-				double newDist = getDistance(v1, v2);
+				double newDist = dist(v1, v2);
 				
 				if (newDist < oldDist) {
 					row.dv = newDist;
@@ -269,11 +271,11 @@ void Zoo::randInsTSP() {
 			[x] init path as {0, 0}
 				("bc then, however u pick the nxt one, u have a plc to insrt it")
 	*/
-	_fast_path.reserve(_num_vertices + 1);	
+	_fast_path.reserve(_num_vert + 1);	
 	_fast_path.push_back(0); //root id (start)
 	_fast_path.push_back(0); //root id (end)
 
-	for (uint32_t k = 1; k < _num_vertices; ++k) { //rand vert id
+	for (uint32_t k = 1; k < _num_vert; ++k) { //rand vert id
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t ins_idx = UINT32_MAX;
 
@@ -296,24 +298,15 @@ void Zoo::randInsTSP() {
 
 //gets cost (could be pos. or neg.) of inserting k between i and j ({i, k, j} = Vertex id's).  
 double Zoo::getInsCost(uint32_t i, uint32_t k, uint32_t j) {
-	Vertex v1 = _vertices[i];
-	Vertex v2 = _vertices[k];
-	Vertex v3 = _vertices[j];
-	double cost = getDistance(v1, v2) + getDistance(v2, v3) - getDistance(v1, v3);
+	Vertex v1 = _vert[i];
+	Vertex v2 = _vert[k];
+	Vertex v3 = _vert[j];
+	double cost = dist(v1, v2) + dist(v2, v3) - dist(v1, v3);
 
 	return cost;
 }
 
-//gets cost (always positive) of adding an edge, given two Vertex id's. 
-double Zoo::getAppendCost(uint32_t i, uint32_t j) {
-	Vertex v1 = _vertices[i];
-	Vertex v2 = _vertices[j];
-	double cost = getDistance(v1, v2);
-
-	return cost;
-}
-
-double Zoo::getDistance(Vertex v1, Vertex v2) {
+double Zoo::dist(Vertex v1, Vertex v2) {
 	double x1 = v1.x;
 	double x2 = v2.x;
 	double y1 = v1.y;
@@ -322,6 +315,39 @@ double Zoo::getDistance(Vertex v1, Vertex v2) {
 	double b = x2 - x1;
 
 	return std::sqrt(static_cast<double>((a * a) + (b * b)));	
+}
+
+//gets cost (always positive) of adding an edge, given two Vertex id's. 
+double Zoo::getAppendCost(uint32_t i, uint32_t j) {
+	Vertex v1 = _vert[i];
+	Vertex v2 = _vert[j];
+	double cost = dist(v1, v2);
+
+	return cost;
+}
+
+double Zoo::armCost(uint32_t pLen, uint32_t idx) {
+	//cost = dist(_path[0], closest_remaining)	
+	/*pseudo:
+	double min;
+	Vertex v1 = _vert[_path[idx]]; //vertex we're connecting from
+
+	for (uint32_t i = pLen; i < _path.size(); i++) {
+		Vertex v2 = _vert[_path[i]];
+		cost = dist(v1, v2);
+		min = min(minCost, cost);
+	}	
+
+	return min;
+	*/
+
+	double min;
+
+	for (uint32_t i = pLen; i < _path.size(); i++) {
+		min = std::min(min, dist(_vert[_path[idx]], _vert[_path[i]]));
+	}	
+
+	return min;
 }
 
 Category Zoo::getCategory(int x, int y) {
@@ -336,7 +362,7 @@ Category Zoo::getCategory(int x, int y) {
 void Zoo::printMST() {
 	std::cout << _mst_tot_dist << "\n";
 
-	for (uint32_t id = 0; id < _num_vertices; ++id) {
+	for (uint32_t id = 0; id < _num_vert; ++id) {
 		uint32_t pv = _table[id].pv;
 
 		if (id != _arbitrary_root_id) { 
@@ -346,15 +372,15 @@ void Zoo::printMST() {
 }
 
 void Zoo::primsLinearPartA() {
-	_table.resize(_num_vertices);
+	_table.resize(_num_vert);
 	_table[_arbitrary_root_id].dv = 0;
 
-	for (uint32_t i = 0; i < _num_vertices; ++i) {
+	for (uint32_t i = 0; i < _num_vert; ++i) {
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t id_min = _arbitrary_root_id; //AG warning forced me to init to val.
 
 		//get shortest dist (find id_min)
-		for (uint32_t i = 0; i < _num_vertices; i++) {
+		for (uint32_t i = 0; i < _num_vert; i++) {
 			if (_table[i].kv == false) {
 				if (_table[i].dv < minDist) {
 					minDist = _table[i].dv;
@@ -370,14 +396,14 @@ void Zoo::primsLinearPartA() {
 		_mst_tot_dist += _table[id_min].dv;
 
 		//update dv,pv (for id_min)
-		for (uint32_t i = 0; i < _num_vertices; i++) {
+		for (uint32_t i = 0; i < _num_vert; i++) {
 			if (_table[i].kv == false) {
-				Vertex v1 = _vertices[id_min];
-				Vertex v2 = _vertices[i];
+				Vertex v1 = _vert[id_min];
+				Vertex v2 = _vert[i];
 				if (!((v1.cat == Category::Safe && v2.cat == Category::Wild) ||
 					  (v1.cat == Category::Wild && v2.cat == Category::Safe))) {
 						double oldDist = _table[i].dv;
-						double newDist = getDistance(v1, v2);
+						double newDist = dist(v1, v2);
 						if (newDist < oldDist) { 
 							_table[i].dv = newDist; 
 							_table[i].pv = id_min;

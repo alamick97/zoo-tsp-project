@@ -4,13 +4,12 @@
 #include <vector>
 #include <tuple>
 #include <limits> //numeric_limits<double>
-#include <algorithm> //swap
+#include <algorithm> //swap, sort, min
 #include <cstring>
 #include <cstdint> //UINT32_MAX
 #include <cmath> //sqrt, round
 #include <cstddef> //size_t
 #include <unordered_set>
-#include <algorithm> //sort, min
 #include <getopt.h>
 
 #ifndef ZOO_H
@@ -75,14 +74,14 @@ class Zoo {
     char** _argv;
     bool _mode_flag;
     Mode _mode;
-    uint32_t _num_vertices;
+    uint32_t _num_vert;
     uint32_t _arbitrary_root_id;
     double _mst_tot_dist; //sum of prim's table dists.
     double _fast_tot;
     double _best_tot; //upper bound. best so far.
     double _tot; //current total.
 
-    std::vector<Vertex> _vertices;
+    std::vector<Vertex> _vert; //all vertices from input file.
     std::vector<primsTable> _table; //prims table
     std::vector<uint32_t> _fast_path; //completed path includes trailing 0.
     std::vector<uint32_t> _best_path; //best COMPLETE path so far. 
@@ -91,9 +90,10 @@ class Zoo {
 public:
     Zoo(int argc, char** argv);
 
-    double getDistance(Vertex v1, Vertex v2); //get euclid dist
+    double dist(Vertex v1, Vertex v2); //get euclid dist
     double getInsCost(uint32_t i, uint32_t k, uint32_t j); //{i, k, j} = vertex IDs
     double getAppendCost(uint32_t i, uint32_t j);
+    double armCost(uint32_t pLen, uint32_t idx); //connects vertex id at _path[idx] to closest unvisited vertex.
     Category getCategory(int x, int y); //calculates & determines category
     void printMST();
     void primsLinearPartA();
