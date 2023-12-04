@@ -145,14 +145,16 @@ bool Zoo::promising(uint32_t pLen) {
 		[] lowerbound = armCost1 + armCost2 + remainingMST	
 	*/
 
-//	[] check connecting arm 1
-//		[] get armCost1
+//	[x] check connecting arm 1
+//		[x] get armCost1
 	double arm1Cost = armCost(pLen, 0);
-//		[] if (_tot + armCost1 >= _best_tot) { return false; }
-//	[] check connecting arm 2
-//		[] get armCost2
-	double arm1Cost = armCost(pLen, pLen - 1);
-//		[] if (_tot + armCost2 >= _best_tot) { return false; }
+//		[x] if (_tot + armCost1 >= _best_tot) { return false; }
+	if (_tot + arm1Cost >= _best_tot) { return false; } 
+//	[x] check connecting arm 2
+//		[x] get armCost2
+	double arm2Cost = armCost(pLen, pLen - 1);
+//		[x] if (_tot + armCost2 >= _best_tot) { return false; }
+	if (_tot + arm2Cost >= _best_tot) { return false; } 
 //	[] check est. of remaining
 //		[] get MST of remaining ONLY
 //		[] lowerbound = armCost1 + armCost2 + remainingMST	
@@ -160,6 +162,7 @@ bool Zoo::promising(uint32_t pLen) {
 
 
 
+//==========OLD CODE BELOW HERE=======================================
 
 
  /*pretty much wrong:
