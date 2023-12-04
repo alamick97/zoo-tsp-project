@@ -76,10 +76,10 @@ class Zoo {
     Mode _mode;
     uint32_t _num_vert;
     uint32_t _arbitrary_root_id;
-    double _mst_tot_dist; //sum of prim's table dists.
-    double _fast_tot;
-    double _best_tot; //upper bound. best so far.
-    double _tot; //current total.
+    double _mst_total_dist; //sum of prim's table dists.
+    double _fast_total;
+    double _best_total; //upper bound. best so far.
+    double _total; //current total.
 
     std::vector<Vertex> _vert; //all vertices from input file.
     std::vector<primsTable> _table; //prims table
@@ -94,6 +94,7 @@ public:
     double getInsCost(uint32_t i, uint32_t k, uint32_t j); //{i, k, j} = vertex IDs
     double getAppendCost(uint32_t i, uint32_t j);
     double armCost(uint32_t pLen, uint32_t idx); //connects vertex id at _path[idx] to closest unvisited vertex.
+    double remMST(uint32_t pLen); //gets remaining MST weight
     Category getCategory(int x, int y); //calculates & determines category
     void printMST();
     void primsLinearPartA();
