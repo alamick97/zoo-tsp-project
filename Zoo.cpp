@@ -126,7 +126,7 @@ void Zoo::genPerms(uint32_t pLen) {
 
 //Note: pLen is always >= 1
 bool Zoo::promising(uint32_t pLen) {
-	uint32_t k = _path.size() - pLen;
+	uint32_t k = static_cast<uint32_t>(_path.size()) - pLen;
 
 	if (k <= 4) { return true; } //efficiency guard.
 
@@ -356,12 +356,12 @@ double Zoo::remMST(uint32_t pLen) {
 	//[x] init arbitrary(first) node to 0
 	_table[_path[pLen]].dv = 0;
 
-	for (uint32_t i = pLen; pLen < _path.size(); i++) { //# of iterations needed
+	for (uint32_t i = pLen; i < _path.size(); i++) { //# of iterations needed
 		double minDist = std::numeric_limits<double>::infinity();
 		uint32_t min_id = _path[pLen];//AG warning forced val init
 
 		//get closest unvisited
-		for (uint32_t idx = pLen; pLen < _path.size(); idx++) {
+		for (uint32_t idx = pLen; idx < _path.size(); idx++) {
 			uint32_t id = _path[idx]; 
 			if (_table[id].kv == false) {
 				if (_table[id].dv < minDist) {
@@ -379,7 +379,7 @@ double Zoo::remMST(uint32_t pLen) {
 		_table[min_id].kv = true;
 		//	update adjacent unvisited dv, pv
 		Vertex v1 = _vert[min_id];
-		for (uint32_t idx = pLen; pLen < _path.size(); idx++) {
+		for (uint32_t idx = pLen; idx < _path.size(); idx++) {
 			uint32_t id = _path[idx];	
 			if (_table[id].kv == false) {
 				Vertex v2 = _vert[id];
