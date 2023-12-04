@@ -31,7 +31,6 @@ enum class Category {
 struct Vertex {
     int x;
     int y;
-    //uint32_t id; //no need to store id. vector index is id.
     Category cat;
 };
 
@@ -66,8 +65,8 @@ class Zoo {
     double _best_total; //upper bound. best so far.
     double _total; //current total.
 
-    std::vector<Vertex> _vert; //all vertices from input file.
-    std::vector<primsTable> _table; //prims table
+    std::vector<Vertex> _vert; //all vertices from input file. idx = vertex id.
+    std::vector<primsTable> _table; //prims table for all vertices read in.
     std::vector<uint32_t> _fast_path; //completed path includes trailing 0.
     std::vector<uint32_t> _best_path; //best COMPLETE path so far. 
     std::vector<uint32_t> _path; //current path.
@@ -76,15 +75,13 @@ public:
     Zoo(int argc, char** argv);
 
     double dist(Vertex v1, Vertex v2); //get euclid dist
-    double getInsCost(uint32_t i, uint32_t k, uint32_t j); //{i, k, j} = vertex IDs
-    double getAppendCost(uint32_t i, uint32_t j);
+    double insCost(uint32_t i, uint32_t k, uint32_t j); //{i, k, j} = vertex IDs
+    double appendCost(uint32_t i, uint32_t j);
     double armCost(uint32_t pLen, uint32_t idx); //connects vertex id at _path[idx] to closest unvisited vertex.
     double remMST(uint32_t pLen); //gets remaining MST weight
-    Category getCategory(int x, int y); //calculates & determines category
+    Category category(int x, int y); //calculates & determines category
     void printMST();
-    void primsLinearPartA();
-    double primsLinearPartC(uint32_t pLen);
-    double getLowerBound(uint32_t pLen); //lowerbound = cur_path + underestimate_of_remaining(mst)
+    void partAMST();
     void randInsTSP();
     void printTSP(Mode tsp);
     
