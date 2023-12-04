@@ -85,13 +85,16 @@ void Zoo::runFASTTSP() {
 void Zoo::runOPTTSP() {
 	randInsTSP(); //gen initial upper bound (part B total).
 	_fast_path.pop_back(); //removes trailing 0 from Part B path.
-
+	_table.resize(_num_vert);
 
 	_best_total = _fast_total; //init to Part B total.
 	_best_path = _fast_path; //init to Part B path.
 	_path = _best_path;
+
 	_total = 0; //safeguard init
+	//_total += getAppendCost(_path[0], _path[1]); //pre-cond (trav. to children)
 	genPerms(1); //updates _best_path & _best_total to approp. vals.
+	//_total -= getAppendCost(_path[0], _path[1]); //pre-cond (trav. to children)
 
 //=========GOOD UP TO HERE #1==========================================================
 	printTSP(Mode::OPTTSP);
@@ -117,9 +120,11 @@ void Zoo::genPerms(uint32_t pLen) {
 //=========GOOD UP TO HERE #2==========================================================
 	for (uint32_t i = pLen; i < _path.size(); ++i) { //continue DFS
 		std::swap(_path[pLen], _path[i]);
-		_total += getAppendCost(_path[pLen], _path[pLen + 1]); //pre-cond (trav. to children)
+		_total += getAppendCost(_path[pLen - 1], _path[pLen]); //pre-cond (trav. to children)
+		//_total += getAppendCost(_path[pLen], _path[pLen + 1]); //post-cond (return to parent)
 		genPerms(pLen + 1);
-		_total -= getAppendCost(_path[pLen], _path[pLen + 1]); //post-cond (return to parent)
+		//_total -= getAppendCost(_path[pLen], _path[pLen + 1]); //post-cond (return to parent)
+		_total -= getAppendCost(_path[pLen - 1], _path[pLen]); //post-cond (return to parent)
 		std::swap(_path[pLen], _path[i]);
 	}
 }
@@ -129,7 +134,6 @@ bool Zoo::promising(uint32_t pLen) {
 	uint32_t k = static_cast<uint32_t>(_path.size()) - pLen;
 
 	if (k <= 4) { return true; } //efficiency guard.
-
 	//[x]lower bound check
 	/*pseudo:
 	[x] check connecting arm 1
@@ -142,23 +146,12 @@ bool Zoo::promising(uint32_t pLen) {
 		[x] get MST of remaining ONLY
 		[x] lowerbound = armCost1 + armCost2 + remainingMST	+ curCost
 	*/
+	double armsCost = armCost(pLen, 0); //arm1 cost
+	if (pLen != 1) { armsCost += armCost(pLen, pLen - 1); } //arm2 cost
+	if (_total + armsCost >= _best_total) { return false; }
 
-//	[x] check connecting arm 1
-//		[x] get armCost1
-	double arm1Cost = armCost(pLen, 0);
-//		[x] if (_total + armCost1 >= _best_total) { return false; }
-	if (_total + arm1Cost >= _best_total) { return false; } 
-//	[x] check connecting arm 2
-//		[x] get armCost2
-	double arm2Cost = armCost(pLen, pLen - 1);
-//		[x] if (_total + armCost2 >= _best_total) { return false; }
-	if (_total + arm2Cost >= _best_total) { return false; } 
-//	[x] check est. of remaining
-//		[x] get MST of remaining ONLY
-	double rem_est = remMST(pLen); //impossible/overly-optimistic remaining estimate
-//		[x] lowerbound = armCost1 + armCost2 + remainingMST + curCost
-	double lowerbound = arm1Cost + arm2Cost + rem_est + _total;
-//	[x] check lowerbound vs. upperbound (best so far)
+	double rem_est = remMST(pLen); //mst remaining estimate
+	double lowerbound = _total + armsCost + rem_est;
 	if (lowerbound >= _best_total) { return false; }
 
 	return true;
@@ -267,7 +260,7 @@ double Zoo::armCost(uint32_t pLen, uint32_t idx) {
 
 	return min;
 	*/
-	double minDist;
+	double minDist = std::numeric_limits<double>::infinity();
 
 	for (uint32_t i = pLen; i < _path.size(); i++) {
 		minDist = std::min(minDist, dist(_vert[_path[idx]], _vert[_path[i]]));
@@ -341,19 +334,17 @@ void Zoo::primsLinearPartA() {
 }
 
 double Zoo::remMST(uint32_t pLen) {
-/*pseudo:
-[x] reset relevant IDs in global prim table:
-	[x] reset to def. constructor vals
-	[x] init arbitrary node to 0
-*/
 	double rem_est = 0;
 
-	//[x] reset relevant IDs in global prim table:
-	for (uint32_t idx = pLen; pLen < _path.size(); idx++) { 
+	//reset relevant IDs in global prim table:
+	for (uint32_t idx = pLen; idx < _path.size(); idx++) { 
 		uint32_t id = _path[idx];	
-		_table[id] = primsTable(); 
+//std::cout << "id: " << id << " | idx: " << idx << "\n";
+//std::cout << "_table.size(): " << _table.size() << "\n";
+		_table[id] = primsTable(); //TODO: FIX SEGAULT HERE!!!
+//std::cout << "debugger reached\n";
 	}
-	//[x] init arbitrary(first) node to 0
+	//init arbitrary(first) node to 0
 	_table[_path[pLen]].dv = 0;
 
 	for (uint32_t i = pLen; i < _path.size(); i++) { //# of iterations needed

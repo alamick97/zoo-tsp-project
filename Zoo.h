@@ -54,21 +54,6 @@ inline bool compareEdges(const Edge& a, const Edge& b) {
     return a.dist < b.dist;
 }
 
-/*P4C: Paoletti vid notes:
-    [x] "you want to get the function to have 1 parameter (or 0)"
-            - "it's possible to make it have 0 params. this is a little harder to do."
-    [] "add a bunch of member vars to your class"
-        [] coordinates that you read in (vertices)
-        [x] path that you're building 
-        [x] length of path you're building 
-        [x] best path you've seen
-            - first use _fast_path from part B.
-        [] length of best path you've seen 
-    [] 
-    [] 
-    [] 
-*/
-
 class Zoo {
     int _argc;
     char** _argv;
