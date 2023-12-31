@@ -321,9 +321,9 @@ double Zoo::remMST(uint32_t pLen) {
 		rem_est += _table[min_id].dv;
 
 		//for id_min:
-		//	update kv
+			//	update kv
 		_table[min_id].kv = true;
-		//	update adjacent unvisited dv, pv
+			//	update adjacent unvisited dv, pv
 		Vertex v1 = _vert[min_id];
 		for (uint32_t idx = pLen; idx < _path.size(); idx++) {
 			uint32_t id = _path[idx];	
